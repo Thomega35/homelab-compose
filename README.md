@@ -7,6 +7,7 @@ Simple Docker Compose files of  my homelab services.
 - `grafana/`: observability stack (Grafana, Prometheus, Loki, Alloy, Node Exporter)
 - `homeassistant/`: Home Assistant container
 - `immich-app/`: Immich stack (server, ML, Redis, Postgres)
+- `nginx/`: Nginx reverse proxy with Let's Encrypt (Cloudflare DNS challenge)
 - `nextcloud/`: Nextcloud AIO master container
 - `watchtower/`: auto-update running containers
 
@@ -17,7 +18,7 @@ Simple Docker Compose files of  my homelab services.
 
 ## Quick start
 
-1. Go to a stack folder (`grafana`, `homeassistant`, `immich-app`, `nextcloud`, or `watchtower`).
+1. Go to a stack folder (`grafana`, `homeassistant`, `immich-app`, `nginx`, `nextcloud`, or `watchtower`).
 2. Create required `.env`.
 3. Start the stack.
 4. Open its URL.
@@ -39,4 +40,17 @@ docker compose logs -f
 - Loki API: http://<host>:3100
 - Home Assistant: http://<host>:8123
 - Immich: http://<host>:2283
+- Nginx HTTPS: https://<your-domain>
 - Nextcloud AIO: http://<host>:6194
+
+## Nginx + Let's Encrypt (Cloudflare DNS)
+
+1. `cat cloudflare.ini.dist > cloudflare.ini` and put your Cloudflare API token.
+2. Restrict file permissions if needed (`chmod 600 nginx/config/dns-conf/cloudflare.ini`).
+3. Start the stack:
+
+```bash
+cd nginx
+cat .env.dist > .env
+docker compose up -d
+```
