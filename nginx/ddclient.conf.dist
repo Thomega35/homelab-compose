@@ -1,0 +1,29 @@
+# ddclient configuration for Cloudflare Dynamic DNS
+# See: https://github.com/hotio/ddclient
+
+# Check external IP every 5 minutes
+daemon=300
+
+# Fetch external IP from web
+use=web, web=checkip.amazonaws.com
+
+# Use Cloudflare API
+protocol=cloudflare
+
+# Cloudflare API Token auth (ddclient v4 format)
+# login must be the literal word 'token', password is your API token
+# Create a token with permissions: Zone.DNS.Edit and Zone.Zone.Read
+login=token
+password=YOUR_CLOUDFLARE_API_TOKEN
+
+# Your domain
+zone=thomega.fr
+
+# TTL in seconds (1 = automatic)
+ttl=1
+
+# Enable wildcard updates
+wildcard=yes
+
+# Hostname(s) to update (the DNS A record must already exist in Cloudflare)
+your.domain.tld

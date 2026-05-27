@@ -21,3 +21,5 @@ config/**/*.sample
 # Keep your custom setup files
 !config/nginx/http_upgrade.conf
 !config/nginx/proxy-confs/
+
+ddclient.conf
