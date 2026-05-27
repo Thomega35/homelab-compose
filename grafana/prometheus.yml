@@ -1,0 +1,26 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Prometheus s'auto-surveille
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Métriques du système hôte via Node Exporter
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'windows-pc' 
+    static_configs:
+      - targets: ['${WINDOWS_PC_IP}:9182']
+
+  - job_name: 'grafana'
+    basic_auth:
+      username: '${GRAFANA_AUTH_USER}'
+      password: '${GRAFANA_AUTH_PASSWORD}'
+    static_configs:
+      - targets: ['grafana:3000']
+
