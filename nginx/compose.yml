@@ -10,6 +10,7 @@ services:
       - TZ=${TZ}
       - URL=${URL}
       - SUBDOMAINS=${SUBDOMAINS}
+      - EXTRA_DOMAINS=${EXTRA_DOMAINS}
       - VALIDATION=dns
       - DNSPLUGIN=cloudflare
       - EMAIL=${EMAIL}
