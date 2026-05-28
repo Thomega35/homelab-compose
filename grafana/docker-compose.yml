@@ -1,6 +1,4 @@
-networks:
-  monitoring:
-    driver: bridge
+version: "3.8"
 
 services:
   # Grafana - Visualisation
@@ -21,7 +19,14 @@ services:
       - grafana-data:/var/lib/grafana
     networks:
       - monitoring
+      - traefik-net  # <-- Added to let Traefik reach the container
     restart: unless-stopped
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.grafana.rule=Host(`grafana.thomega.fr`)'
+      - 'traefik.http.routers.grafana.entryPoints=websecure'
+      - 'traefik.http.services.grafana.loadbalancer.server.port=3000' # Internal container port
+      - 'traefik.docker.network=traefik-net' # Force Traefik onto the correct network bridge
 
   # Prometheus - Metriques
   prometheus:
@@ -42,7 +47,14 @@ services:
       - '--web.enable-remote-write-receiver'
     networks:
       - monitoring
+      - traefik-net  # <-- Added to let Traefik reach the container
     restart: unless-stopped
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.prometheus.rule=Host(`prometheus.thomega.fr`)'
+      - 'traefik.http.routers.prometheus.entryPoints=websecure'
+      - 'traefik.http.services.prometheus.loadbalancer.server.port=9090' # Internal container port
+      - 'traefik.docker.network=traefik-net' # Force Traefik onto the correct network bridge
 
   # Node Exporter - Métriques de l'hôte (CPU, RAM, etc.)
   node-exporter:
@@ -98,3 +110,9 @@ volumes:
   prometheus-data:
   loki-data:
 
+networks:
+  monitoring:
+    driver: bridge
+  traefik-net:      # <-- Linked as an external reference to your core Traefik stack network
+    external: true
+    name: traefik-net
