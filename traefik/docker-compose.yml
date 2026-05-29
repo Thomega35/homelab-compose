@@ -3,7 +3,7 @@ services:
     image: traefik:v3.6
     command:
       - "--providers.docker=true"
-      - "--certificatesresolvers.letsencrypt.acme.email=fabigoardou@gmail.com"
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@thomega.fr"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
@@ -45,6 +45,7 @@ services:
       - 'traefik.http.routers.api.entryPoints=websecure'
       - 'traefik.http.routers.api.service=api@internal'
       - 'traefik.http.services.api.loadbalancer.server.port=8080'
+      - 'traefik.http.routers.api.middlewares=authentik@docker'
     networks:
       - traefik-net
       - default
