@@ -1,3 +1,9 @@
+version: '3.8'
+
+networks:
+  traefik-net:
+    external: true
+
 services:
   postgres:
     image: docker.io/library/postgres:16-alpine
@@ -16,13 +22,12 @@ services:
       POSTGRES_USER: ${PG_USER:-authentik}
       POSTGRES_DB: ${PG_DB:-authentik}
     networks:
-      - traefik-net  # <-- Added so the network exists here
+      - traefik-net
 
   redis:
     image: docker.io/library/redis:alpine
     restart: unless-stopped
     container_name: authentik_redis
-    hostname: redis
     command: --save 60 1 --loglevel warning
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
@@ -33,21 +38,19 @@ services:
     volumes:
       - /data/authentik/redis:/data
     networks:
-      - traefik-net  # <-- Added so redis is on the same wire
+      - traefik-net
 
   server:
     image: ghcr.io/goauthentik/server:2026.2
     restart: unless-stopped
     command: server
     container_name: authentik_server
-    hostname: authentik_server
     ports:
       - "9000:9000" 
       - "8000:8000" 
     environment:
-      # Changed to match the exact service block keys below to prevent DNS failure
-      AUTHENTIK_REDIS__HOST: redis                
-      AUTHENTIK_POSTGRESQL__HOST: postgres        
+      AUTHENTIK_REDIS__HOST: authentik_redis
+      AUTHENTIK_POSTGRESQL__HOST: authentik_postgres
       AUTHENTIK_POSTGRESQL__USER: ${PG_USER:-authentik}
       AUTHENTIK_POSTGRESQL__NAME: ${PG_DB:-authentik}
       AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_DB_PASSWORD}
@@ -67,10 +70,13 @@ services:
       - 'traefik.enable=true'
       - 'traefik.http.routers.authentik.rule=Host(`auth.thomega.fr`)'
       - 'traefik.http.routers.authentik.entryPoints=websecure'
+      - 'traefik.http.routers.authentik.tls=true'
       - 'traefik.http.services.authentik.loadbalancer.server.port=9000'
-      - 'traefik.http.middlewares.authentik.forwardauth.address=http://authentik_server:9000/outpost.goauthentik.io/auth/traefik'
-      - 'traefik.http.middlewares.authentik.forwardauth.trustForwardHeader=true'
-      - 'traefik.http.middlewares.authentik.forwardauth.authResponseHeaders=X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,X-authentik-jwt,X-authentik-meta-jwks,X-authentik-meta-outpost,X-authentik-meta-provider,X-authentik-meta-app,X-authentik-meta-version'
+      
+      # Defining the middleware using the absolute container name
+      - 'traefik.http.middlewares.authentik-auth.forwardauth.address=http://authentik_server:9000/outpost.goauthentik.io/auth/traefik'
+      - 'traefik.http.middlewares.authentik-auth.forwardauth.trustForwardHeader=true'
+      - 'traefik.http.middlewares.authentik-auth.forwardauth.authResponseHeaders=X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,X-authentik-jwt,X-authentik-meta-jwks,X-authentik-meta-outpost,X-authentik-meta-provider,X-authentik-meta-app,X-authentik-meta-version'
     networks:
       - traefik-net
 
@@ -80,9 +86,8 @@ services:
     container_name: authentik_worker
     command: worker
     environment:
-      # Kept as redis/postgres because they share the traefik internal aliases
-      AUTHENTIK_REDIS__HOST: redis
-      AUTHENTIK_POSTGRESQL__HOST: postgres
+      AUTHENTIK_REDIS__HOST: authentik_redis
+      AUTHENTIK_POSTGRESQL__HOST: authentik_postgres
       AUTHENTIK_POSTGRESQL__USER: ${PG_USER:-authentik}
       AUTHENTIK_POSTGRESQL__NAME: ${PG_DB:-authentik}
       AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_DB_PASSWORD}
@@ -101,7 +106,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - traefik-net  # <-- Added worker to the grid
+      - traefik-net
 
   authentik_ldap:
     image: ghcr.io/goauthentik/ldap:2026.2
@@ -112,8 +117,4 @@ services:
       AUTHENTIK_INSECURE: "false"
       AUTHENTIK_TOKEN: ${AUTHENTIK_LDAP_TOKEN}
     networks:
-      - traefik-net  # <-- Added LDAP proxy helper to the grid
-
-networks:
-  traefik-net:
-    external: true
+      - traefik-net
