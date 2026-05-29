@@ -38,6 +38,12 @@ services:
       - 'traefik.docker.network=traefik-net'
       - 'traefik.http.routers.grafana.rule=Host(`grafana.thomega.fr`)'
       - 'traefik.http.routers.grafana.entrypoints=websecure'
+      - 'traefik.http.routers.grafana-metrics.rule=Host(`grafana.thomega.fr`) && Path(`/metrics`)'
+      - 'traefik.http.routers.grafana-metrics.entrypoints=websecure'
+      - 'traefik.http.routers.grafana-metrics.priority=100'
+      - 'traefik.http.routers.grafana-metrics.middlewares=grafana-metrics-auth'
+      - 'traefik.http.routers.grafana-metrics.service=grafana'
+      - 'traefik.http.middlewares.grafana-metrics-auth.basicauth.users=${GRAFANA_METRICS_BASIC_AUTH_USERS}'
       - 'traefik.http.services.grafana.loadbalancer.server.port=3000'
     networks:
       - monitoring
@@ -52,6 +58,8 @@ services:
       - "9090:9090"
     environment:
       - WINDOWS_PC_IP=${WINDOWS_PC_IP}
+    extra_hosts:
+      - "windows-pc-exporter:${WINDOWS_PC_IP}"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus

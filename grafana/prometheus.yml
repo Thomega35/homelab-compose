@@ -15,7 +15,7 @@ scrape_configs:
 
   - job_name: 'windows-pc' 
     static_configs:
-      - targets: ['${WINDOWS_PC_IP}:9182']
+      - targets: ['windows-pc-exporter:9182']
 
   - job_name: 'grafana'
     static_configs:
