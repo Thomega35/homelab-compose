@@ -54,8 +54,7 @@ services:
       - 'traefik.docker.network=traefik-net'
       - 'traefik.http.routers.prometheus.rule=Host(`prometheus.thomega.fr`)'
       - 'traefik.http.routers.prometheus.entrypoints=websecure'
-      - 'traefik.http.routers.prometheus.middlewares=prometheus-auth'
-      - 'traefik.http.middlewares.prometheus-auth.basicauth.users=${PROMETHEUS_BASIC_AUTH}'
+      - 'traefik.http.routers.prometheus.middlewares=authentik-auth@docker'
       - 'traefik.http.services.prometheus.loadbalancer.server.port=9090'
     networks:
       - monitoring

@@ -45,7 +45,7 @@ services:
       - 'traefik.http.routers.api.entryPoints=websecure'
       - 'traefik.http.routers.api.service=api@internal'
       - 'traefik.http.services.api.loadbalancer.server.port=8080'
-      - 'traefik.http.routers.api.middlewares=authentik@docker'
+      - 'traefik.http.routers.api.middlewares=authentik-auth@docker'
     networks:
       - traefik-net
       - default
