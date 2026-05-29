@@ -13,8 +13,6 @@ services:
       - "3000:3000"
     environment:
       - GF_METRICS_ENABLED=true
-      - GF_METRICS_BASIC_AUTH_USERNAME=${GRAFANA_AUTH_USER}
-      - GF_METRICS_BASIC_AUTH_PASSWORD=${GRAFANA_AUTH_PASSWORD}
       - GF_ANALYTICS_REPORTING_ENABLED=false
       - GF_ANALYTICS_CHECK_FOR_UPDATES=false
     extra_hosts:
@@ -26,6 +24,7 @@ services:
       - 'traefik.docker.network=traefik-net'
       - 'traefik.http.routers.grafana.rule=Host(`grafana.thomega.fr`)'
       - 'traefik.http.routers.grafana.entrypoints=websecure'
+      - 'traefik.http.routers.grafana.middlewares=authentik-auth@docker'
       - 'traefik.http.services.grafana.loadbalancer.server.port=3000'
     networks:
       - monitoring
@@ -39,8 +38,6 @@ services:
     ports:
       - "9090:9090"
     environment:
-      - GRAFANA_AUTH_USER=${GRAFANA_AUTH_USER}
-      - GRAFANA_AUTH_PASSWORD=${GRAFANA_AUTH_PASSWORD}
       - WINDOWS_PC_IP=${WINDOWS_PC_IP}
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml

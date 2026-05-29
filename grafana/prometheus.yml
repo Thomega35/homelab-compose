@@ -18,9 +18,6 @@ scrape_configs:
       - targets: ['${WINDOWS_PC_IP}:9182']
 
   - job_name: 'grafana'
-    basic_auth:
-      username: '${GRAFANA_AUTH_USER}'
-      password: '${GRAFANA_AUTH_PASSWORD}'
     static_configs:
       - targets: ['grafana:3000']
 
