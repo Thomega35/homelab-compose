@@ -22,7 +22,7 @@ services:
     depends_on:
       - redis
       - database
-    restart: always
+    restart: unless-stopped
     networks:
       - thomega-net
       - traefik-net
@@ -40,14 +40,14 @@ services:
       - model-cache:/cache
     env_file:
       - .env
-    restart: always
+    restart: unless-stopped
     networks:
       - thomega-net
 
   redis:
     container_name: immich_redis
     image: docker.io/valkey/valkey:9@sha256:546304417feac0874c3dd576e0952c6bb8f06bb4093ea0c9ca303c73cf458f63
-    restart: always
+    restart: unless-stopped
     networks:
       - thomega-net
 
@@ -62,7 +62,7 @@ services:
     volumes:
       - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
     shm_size: 128mb
-    restart: always
+    restart: unless-stopped
     networks:
       - thomega-net
 
