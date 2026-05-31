@@ -13,3 +13,9 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.homeassistant.rule=Host(`home.thomega.fr`)'
+      - 'traefik.http.routers.homeassistant.entryPoints=websecure'
+      - 'traefik.http.services.homeassistant.loadbalancer.server.port=8123'
+      - 'traefik.docker.network=traefik-net'
