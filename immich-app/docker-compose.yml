@@ -66,5 +66,37 @@ services:
     networks:
       - thomega-net
 
+  immich-kiosk:
+    image: ghcr.io/damongolding/immich-kiosk:latest
+    container_name: immich-kiosk
+    tty: true
+    env_file:
+      - .env
+    environment:
+      LANG: "fr_FR.UTF-8"
+      TZ: "Europe/Paris"
+      KIOSK_IMMICH_URL: ${KIOSK_IMMICH_URL:-http://immich_server:2283}
+      KIOSK_IMMICH_API_KEY: ${KIOSK_IMMICH_API_KEY:?Set KIOSK_IMMICH_API_KEY in immich-app/.env}
+    networks:
+      - thomega-net
+      - traefik-net
+    ports:
+      - 3200:3000
+    volumes:
+      - ./config:/config
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    # labels:
+    #   - 'traefik.enable=true'
+    #   - 'traefik.http.routers.immich-kiosk.rule=Host(`kiosk.thomega.fr`)'
+    #   - 'traefik.http.routers.immich-kiosk.entryPoints=websecure'
+    #   - 'traefik.http.services.immich-kiosk.loadbalancer.server.port=3000'
+    #   - 'traefik.docker.network=traefik-net'
+
 volumes:
   model-cache:
