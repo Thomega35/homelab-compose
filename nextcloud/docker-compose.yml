@@ -1,22 +1,73 @@
 services:
-  nextcloud-aio-mastercontainer:
-    image: nextcloud/all-in-one:latest
-    container_name: nextcloud-aio-mastercontainer
-    restart: unless-stopped
-
-    ports:
-      - "6194:8080"
-
+  nextcloud:
+    image: nextcloud:32.0.8
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
-      - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
+      - /data/nextcloud/code:/var/www/html
       - /mnt/nas:/data        # <- NAS mount here
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-
     environment:
-      - NEXTCLOUD_DATADIR=/data
-      - APACHE_PORT=11000
-      - APACHE_IP_BINDING=0.0.0.0
+      - APACHE_DISABLE_REWRITE_IP=true
+      - TRUSTED_PROXIES=10.0.0.0/8 172.16.0.0/8
+      - OVERWRITEHOST=nextcloud.thomega.fr
+      - OVERWRITEPROTOCOL=https
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=${NEXTCLOUD_DB_PASSWORD}
+      - POSTGRES_HOST=postgres
+      - PHP_MEMORY_LIMIT=1024M
+      - PHP_UPLOAD_LIMIT=1024M
+      - REDIS_HOST=redis
+    restart: unless-stopped
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.nextcloud.rule=Host(`nextcloud.thomega.fr`)'
+      - 'traefik.http.routers.nextcloud.entryPoints=websecure'
+      - 'traefik.http.services.nextcloud.loadbalancer.server.port=80'
+      - 'traefik.docker.network=traefik-net'
+    networks:
+      - traefik-net
+      - nextcloud-internal
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=${NEXTCLOUD_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nextcloud -d nextcloud"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    volumes:
+      - nextcloud_postgres_data:/var/lib/postgresql/data
+    networks:
+      - nextcloud-internal
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - nextcloud-internal
+
+networks:
+  traefik-net:
+    external: true
+    name: traefik-net
+  nextcloud-internal:
 
 volumes:
-  nextcloud_aio_mastercontainer:
-    name: nextcloud_aio_mastercontainer
+  nextcloud_postgres_data:
