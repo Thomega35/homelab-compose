@@ -52,7 +52,27 @@ services:
       - traefik-net
       - default
 
+  cloudflare-ddns-thomega:
+    image: favonia/cloudflare-ddns:1
+    environment:
+      CLOUDFLARE_API_TOKEN: ${CF_DNS_API_TOKEN}
+      DOMAINS: ${CF_DDNS_THOMEGA_DOMAIN}
+      PROXIED: ${CF_DDNS_THOMEGA_PROXIED:-false}
+      IP6_PROVIDER: ${CF_DDNS_IP6_PROVIDER:-none}
+      TZ: ${TZ:-UTC}
+    restart: unless-stopped
+
+  cloudflare-ddns-fanfare:
+    image: favonia/cloudflare-ddns:1
+    environment:
+      CLOUDFLARE_API_TOKEN: ${CF_DNS_API_TOKEN}
+      DOMAINS: ${CF_DDNS_FANFARE_DOMAIN}
+      PROXIED: ${CF_DDNS_FANFARE_PROXIED:-true}
+      IP6_PROVIDER: ${CF_DDNS_IP6_PROVIDER:-none}
+      TZ: ${TZ:-UTC}
+    restart: unless-stopped
+
 networks:
-  traefik-net:       # Shorthand name
+  traefik-net:
     driver: bridge
     name: traefik-net
