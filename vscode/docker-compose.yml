@@ -1,0 +1,35 @@
+networks:
+  traefik-net:
+    external: true
+
+services:
+  vscode:
+    image: docker.io/codercom/code-server:latest
+    restart: unless-stopped
+    container_name: vscode
+    user: "1002:1002"
+    command: ["--auth", "none", "/home/thome/homelab-compose"]
+    environment:
+      - TZ=Europe/Paris
+      - HOME=/home/thome
+    volumes:
+      - /data/vscode/config:/home/thome/.config
+      - /data/vscode/local:/home/thome/.local
+      - /home/thome:/home/thome
+    networks:
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vscode.rule=Host(`vscode.thomega.fr`)"
+      - "traefik.http.routers.vscode.entrypoints=websecure"
+      - "traefik.http.routers.vscode.tls.certresolver=letsencrypt"
+      - "traefik.http.services.vscode.loadbalancer.server.port=8080"
+      - "traefik.http.routers.vscode.middlewares=authentik-auth@docker"
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-o", "/dev/null", "http://localhost:8080/"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    security_opt:
+      - seccomp:unconfined
