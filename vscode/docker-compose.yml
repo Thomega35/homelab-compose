@@ -7,7 +7,7 @@ services:
     image: docker.io/codercom/code-server:latest
     restart: unless-stopped
     container_name: vscode
-    user: "1002:1002"
+    user: "0:0"
     command: ["--auth", "none", "/home/thome/homelab-compose"]
     environment:
       - TZ=Europe/Paris
@@ -16,6 +16,10 @@ services:
       - /data/vscode/config:/home/thome/.config
       - /data/vscode/local:/home/thome/.local
       - /home/thome:/home/thome
+      # --- THE MAGIC MOUNTS TO ACCESS THE HOST ---
+      - /var/run/docker.sock:/var/run/docker.sock # Gives the container access to your host's Docker engine
+      - /usr/bin/docker:/usr/bin/docker           # Mounts the host's docker CLI binary directly into the container
+      - /usr/libexec/docker/cli-plugins:/usr/libexec/docker/cli-plugins
     networks:
       - traefik-net
     labels:
