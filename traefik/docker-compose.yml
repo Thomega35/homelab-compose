@@ -19,7 +19,6 @@ services:
       - "--entrypoints.websecure.http.tls.domains[1].sans=*.fanfare-makabes.fr"
       - "--entrypoints.websecure.http.encodedCharacters.allowEncodedHash=true"
       - "--entrypoints.websecure.http.encodedCharacters.allowEncodedSlash=true"
-      - "--entrypoints.ssh.address=:22"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.file.filename=/letsencrypt/config.yaml"
       - "--api.dashboard=true"
@@ -28,6 +27,11 @@ services:
       - "--metrics.prometheus=true"
       - "--entryPoints.metrics.address=:8082"
       - "--metrics.prometheus.entryPoint=metrics"
+      # Ajoute ces lignes dans les commandes de ton container Traefik :
+      # https://docs.immich.app/administration/reverse-proxy/
+      - "--entrypoints.websecure.transport.respondingTimeouts.readTimeout=3600s"
+      - "--entrypoints.websecure.transport.respondingTimeouts.writeTimeout=3600s"
+      - "--entrypoints.websecure.transport.respondingTimeouts.idleTimeout=3600s"
     environment:
       CLOUDFLARE_EMAIL: ${CLOUDFLARE_EMAIL}
       CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN}
