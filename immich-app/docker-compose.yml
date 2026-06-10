@@ -1,12 +1,5 @@
 name: immich
 
-networks:
-  immich-net:
-    name: immich-net
-  traefik-net:
-    external: true
-    name: traefik-net
-
 services:
   immich-server:
     container_name: immich_server
@@ -97,6 +90,13 @@ services:
       - 'traefik.http.services.immich-kiosk.loadbalancer.server.port=3000'
       - 'traefik.http.routers.immich-kiosk.middlewares=authentik-auth@docker'
       - 'traefik.docker.network=traefik-net'
+
+networks:
+  immich-net:
+    name: immich-net
+  traefik-net:
+    external: true
+    name: traefik-net
 
 volumes:
   model-cache:
