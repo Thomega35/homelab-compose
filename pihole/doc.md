@@ -17,7 +17,7 @@ network:
       optional: true
 ```
 
-sudo netplan try
+sudo netplan apply
 => Enter
 
 ip addr show enp0s3
