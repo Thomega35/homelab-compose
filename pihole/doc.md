@@ -13,7 +13,7 @@ network:
           via: 192.168.0.1
       nameservers:
         addresses:
-          - 192.168.1.5
+          - 1.1.1.1 // Otherwise broken
       optional: true
 ```
 
