@@ -17,10 +17,12 @@ network:
       optional: true
 ```
 
+sudo nano /data/pihole/etc-dnsmasq.d/dnsmasq-dhcp.conf
+
 sudo netplan apply
 => Enter
 
-ip addr show enp0s3
+ip addr show enp34s0
 ip route
 cat /etc/resolv.conf
 

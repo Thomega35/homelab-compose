@@ -13,9 +13,8 @@ services:
       FTLCONF_dhcp_start: '192.168.1.100'
       FTLCONF_dhcp_end: '192.168.1.250'
       FTLCONF_dhcp_router: '192.168.1.1'
-      FTLCONF_dhcp_domain: 'thomega.fr'
-      # macvlan gives real LAN interface - pi-hole will listen on it for DHCP/DNS
-      FTLCONF_dhcp_interface: 'eth0'
+      FTLCONF_dns_domain_name: 'thomega.fr'
+      FTLCONF_dns_interface: 'eth0'
     volumes:
       - '/data/pihole/etc-pihole:/etc/pihole/'
       - '/data/pihole/etc-dnsmasq.d:/etc/dnsmasq.d/' 
@@ -30,12 +29,17 @@ services:
       traefik-net:
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
       - "traefik.http.routers.hole.rule=Host(`hole.thomega.fr`)"
       - "traefik.http.routers.hole.entrypoints=websecure"
       - "traefik.http.routers.hole.tls.certresolver=letsencrypt"
-      - "traefik.http.services.hole.loadbalancer.server.port=80"
+      - "traefik.http.services.hole-service.loadbalancer.server.port=80"
       - "traefik.http.routers.hole.middlewares=authentik-auth@docker"
-
+      - "traefik.http.routers.hole.service=hole-service"
+      - "traefik.http.routers.hole-bypass.rule=Host(`hole.thomega.fr`) && (PathPrefix(`/admin/img`) || PathPrefix(`/api`))"
+      - "traefik.http.routers.hole-bypass.entrypoints=websecure"
+      - "traefik.http.routers.hole-bypass.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.hole-bypass.service=hole-service"
 networks:
   pihole-macvlan:
     driver: macvlan
