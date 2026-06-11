@@ -4,7 +4,7 @@ sudo nano /etc/netplan/50-cloud-init.yaml
 network:
   version: 2
   ethernets:
-    enp0s3:  // Your internet name
+    enp34s0:  // Your internet name
       dhcp4: false
       addresses:
         - 192.168.1.5/24
