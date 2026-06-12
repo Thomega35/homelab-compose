@@ -15,9 +15,9 @@ services:
       FTLCONF_dhcp_router: '192.168.1.1'
       FTLCONF_dns_domain_name: 'thomega.fr'
       FTLCONF_dns_interface: 'eth0'
+      FTLCONF_misc_dnsmasq_lines: 'address=/thomega.fr/192.168.1.5'
     volumes:
       - '/data/pihole/etc-pihole:/etc/pihole/'
-      - '/data/pihole/etc-dnsmasq.d:/etc/dnsmasq.d/' 
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
