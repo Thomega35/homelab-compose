@@ -17,7 +17,7 @@ network:
           via: 192.168.1.1
       nameservers:
         addresses:
-          - 1.1.1.1  # Must be an external DNS, not Pi-hole, to avoid a boot-time chicken-and-egg problem
+          - 192.168.1.6
       optional: true
 ```
 
