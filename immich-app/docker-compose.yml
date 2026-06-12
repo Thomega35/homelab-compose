@@ -77,18 +77,12 @@ services:
     volumes:
       - ./config:/config
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.immich-kiosk.rule=Host(`kiosk.thomega.fr`)'
-      - 'traefik.http.routers.immich-kiosk.entryPoints=websecure'
-      - 'traefik.http.services.immich-kiosk.loadbalancer.server.port=3000'
-      - 'traefik.http.routers.immich-kiosk.middlewares=authentik-auth@docker'
+      - 'traefik.http.routers.immichkiosk.rule=Host(`kiosk.thomega.fr`)'
+      - 'traefik.http.routers.immichkiosk.entryPoints=websecure'
+      - 'traefik.http.services.immichkiosk.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.immichkiosk.middlewares=authentik-auth@docker'
       - 'traefik.docker.network=traefik-net'
 
 networks:
