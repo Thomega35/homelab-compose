@@ -8,9 +8,11 @@ Simple Docker Compose files for my homelab services.
 - `grafana/`: Observability stack (Grafana, Prometheus, Loki, Alloy, Node Exporter)
 - `homeassistant/`: Home Assistant
 - `immich-app/`: Immich stack (server, ML, Redis, Postgres)
+- `meshcentral/`: MeshCentral remote device management
 - `nextcloud/`: Nextcloud AIO master container
 - `pihole/`: Pi-hole DNS + DHCP (macvlan)
 - `traefik/`: Reverse proxy + TLS (Let's Encrypt DNS challenge with Cloudflare) + Cloudflare DDNS
+- `uptime-kuma/`: Uptime Kuma monitoring dashboard
 - `vscode/`: code-server exposed behind Traefik + Authentik
 
 ## Requirements
@@ -20,7 +22,7 @@ Simple Docker Compose files for my homelab services.
 
 ## Quick start
 
-1. Go to a stack folder (`authentik`, `grafana`, `homeassistant`, `immich-app`, `nextcloud`, `pihole`, `traefik`, or `vscode`).
+1. Go to a stack folder (`authentik`, `grafana`, `homeassistant`, `immich-app`, `meshcentral`, `nextcloud`, `pihole`, `traefik`, `uptime-kuma`, or `vscode`).
 2. Create required `.env` if the stack provides a template.
 3. Start the stack.
 4. Open its URL.
@@ -45,7 +47,9 @@ docker compose logs -f
 - Nextcloud AIO: `http://thomega.fr:6194`
 - Traefik dashboard: `https://traefik.thomega.fr`
 - Authentik: `https://auth.thomega.fr`
+- MeshCentral: `https://mesh.thomega.fr`
 - Pi-hole: `https://hole.thomega.fr` (or `http://thomega.fr:800`)
+- Uptime Kuma: `https://upk.thomega.fr` (or `http://thomega.fr:3001`)
 - VS Code: `https://vscode.thomega.fr`
 
 ## Notes
