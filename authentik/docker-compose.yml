@@ -100,16 +100,17 @@ services:
     networks:
       - traefik-net
 
-  authentik_ldap:
-    image: ghcr.io/goauthentik/ldap:2026.5
-    restart: unless-stopped
-    container_name: authentik_ldap
-    environment:
-      AUTHENTIK_HOST: https://auth.thomega.fr
-      AUTHENTIK_INSECURE: "false"
-      AUTHENTIK_TOKEN: ${AUTHENTIK_LDAP_TOKEN}
-    networks:
-      - traefik-net
+  # authentik_ldap:
+  #   image: ghcr.io/goauthentik/ldap:2026.5
+  #   restart: unless-stopped
+  #   container_name: authentik_ldap
+  #   environment:
+  #     AUTHENTIK_HOST: https://auth.thomega.fr
+  #     AUTHENTIK_INSECURE: "false"
+  #     AUTHENTIK_TOKEN: ${AUTHENTIK_LDAP_TOKEN}
+  #   networks:
+  #     - traefik-net
+  # Only for Jellyfin, Emby, Plex, and other media servers that support LDAP authentication. If you don't use any of these, you can remove this service.
 
 networks:
   traefik-net:
