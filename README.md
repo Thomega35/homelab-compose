@@ -5,12 +5,14 @@ Simple Docker Compose files for my homelab services.
 ## Services
 
 - `authentik/`: Identity provider and forward-auth middleware for Traefik
+- `excalidraw/`: Excalidraw collaborative whiteboard (app + storage + room + MongoDB)
 - `grafana/`: Observability stack (Grafana, Prometheus, Loki, Alloy, Node Exporter)
 - `homeassistant/`: Home Assistant
 - `immich-app/`: Immich stack (server, ML, Redis, Postgres)
 - `meshcentral/`: MeshCentral remote device management
 - `nextcloud/`: Nextcloud AIO master container
 - `pihole/`: Pi-hole DNS + DHCP (macvlan)
+- `portainer/`: Portainer CE container management UI
 - `traefik/`: Reverse proxy + TLS (Let's Encrypt DNS challenge with Cloudflare) + Cloudflare DDNS
 - `uptime-kuma/`: Uptime Kuma monitoring dashboard
 - `vscode/`: code-server exposed behind Traefik + Authentik
@@ -22,7 +24,7 @@ Simple Docker Compose files for my homelab services.
 
 ## Quick start
 
-1. Go to a stack folder (`authentik`, `grafana`, `homeassistant`, `immich-app`, `meshcentral`, `nextcloud`, `pihole`, `traefik`, `uptime-kuma`, or `vscode`).
+1. Go to a stack folder (`authentik`, `grafana`, `homeassistant`...).
 2. Create required `.env` if the stack provides a template.
 3. Start the stack.
 4. Open its URL.
@@ -45,8 +47,10 @@ docker compose logs -f
 - Home Assistant: `http://thomega.fr:8123`
 - Immich: `http://thomega.fr:2283`
 - Nextcloud AIO: `http://thomega.fr:6194`
+- Portainer: `https://portainer.thomega.fr`
 - Traefik dashboard: `https://traefik.thomega.fr`
 - Authentik: `https://auth.thomega.fr`
+- Excalidraw: `https://draw.thomega.fr`
 - MeshCentral: `https://mesh.thomega.fr`
 - Pi-hole: `https://hole.thomega.fr` (or `http://thomega.fr:800`)
 - Uptime Kuma: `https://upk.thomega.fr` (or `http://thomega.fr:3001`)

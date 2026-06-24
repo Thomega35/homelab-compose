@@ -1,0 +1,29 @@
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    privileged: true
+    security_opt:
+      - no-new-privileges:true
+    env_file:
+      - ./.env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${PORTAINER_DATA_PATH:-/data/portainer}:/data
+    networks:
+      - traefik-net
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=${TRAEFIK_NETWORK_NAME:-traefik-net}'
+      - 'traefik.http.routers.portainer.rule=Host(`${PORTAINER_HOST:-portainer.thomega.fr}`)'
+      - 'traefik.http.routers.portainer.entryPoints=${TRAEFIK_ENTRYPOINT:-websecure}'
+      - 'traefik.http.routers.portainer.tls=true'
+      - 'traefik.http.routers.portainer.middlewares=authentik-auth@docker'
+      - 'traefik.http.services.portainer.loadbalancer.server.port=9000'
+
+networks:
+  traefik-net:
+    name: ${TRAEFIK_NETWORK_NAME:-traefik-net}
+    external: true
