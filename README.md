@@ -41,19 +41,18 @@ docker compose logs -f
 
 ## URLs
 
-- Grafana: `http://thomega.fr:3000`
-- Prometheus: `http://thomega.fr:9090`
-- Loki API: `http://thomega.fr:3100`
-- Home Assistant: `http://thomega.fr:8123`
-- Immich: `http://thomega.fr:2283`
-- Nextcloud AIO: `http://thomega.fr:6194`
+- Grafana: `https://grafana.thomega.fr`
+- Prometheus: `https://prometheus.thomega.fr`
+- Home Assistant: `https://home.thomega.fr`
+- Immich: `https://photo.thomega.fr`
+- Nextcloud AIO: `https://nextcloud.thomega.fr`
 - Portainer: `https://portainer.thomega.fr`
 - Traefik dashboard: `https://traefik.thomega.fr`
 - Authentik: `https://auth.thomega.fr`
 - Excalidraw: `https://draw.thomega.fr`
 - MeshCentral: `https://mesh.thomega.fr`
-- Pi-hole: `https://hole.thomega.fr` (or `http://thomega.fr:800`)
-- Uptime Kuma: `https://upk.thomega.fr` (or `http://thomega.fr:3001`)
+- Pi-hole: `https://hole.thomega.fr`
+- Uptime Kuma: `https://upk.thomega.fr`
 - VS Code: `https://vscode.thomega.fr`
 
 ## Notes

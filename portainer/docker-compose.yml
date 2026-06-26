@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     privileged: true
     ports:
-      - "${PORTAINER_PORT:-9500}:9500"
+      - "${PORTAINER_PORT:-9500}:9000"
     security_opt:
       - no-new-privileges:true
     env_file:
