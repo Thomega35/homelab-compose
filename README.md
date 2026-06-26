@@ -11,6 +11,7 @@ Simple Docker Compose files for my homelab services.
 - `immich-app/`: Immich stack (server, ML, Redis, Postgres)
 - `meshcentral/`: MeshCentral remote device management
 - `nextcloud/`: Nextcloud AIO master container
+- `openspeedtest/`: OpenSpeedTest self-hosted speed test server
 - `pihole/`: Pi-hole DNS + DHCP (macvlan)
 - `portainer/`: Portainer CE container management UI
 - `traefik/`: Reverse proxy + TLS (Let's Encrypt DNS challenge with Cloudflare) + Cloudflare DDNS
@@ -46,6 +47,7 @@ docker compose logs -f
 - Home Assistant: `https://home.thomega.fr`
 - Immich: `https://photo.thomega.fr`
 - Nextcloud AIO: `https://nextcloud.thomega.fr`
+- OpenSpeedTest: `https://speed.thomega.fr`
 - Portainer: `https://portainer.thomega.fr`
 - Traefik dashboard: `https://traefik.thomega.fr`
 - Authentik: `https://auth.thomega.fr`

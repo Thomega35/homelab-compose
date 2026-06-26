@@ -1,0 +1,21 @@
+services:
+  speedtest:
+    image: openspeedtest/latest
+    container_name: openspeedtest
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    networks:
+      - traefik-net
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=${TRAEFIK_NETWORK_NAME:-traefik-net}'
+      - 'traefik.http.routers.openspeedtest.rule=Host(`${OPENSPEEDTEST_HOST:-speed.thomega.fr}`)'
+      - 'traefik.http.routers.openspeedtest.entryPoints=${TRAEFIK_ENTRYPOINT:-websecure}'
+      - 'traefik.http.routers.openspeedtest.tls=true'
+      - 'traefik.http.services.openspeedtest.loadbalancer.server.port=3000'
+
+networks:
+  traefik-net:
+    name: ${TRAEFIK_NETWORK_NAME:-traefik-net}
+    external: true
