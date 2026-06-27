@@ -14,6 +14,7 @@ Simple Docker Compose files for my homelab services.
 - `openspeedtest/`: OpenSpeedTest self-hosted speed test server
 - `pihole/`: Pi-hole DNS + DHCP (macvlan)
 - `portainer/`: Portainer CE container management UI
+- `super-productivity/`: Super Productivity + WebDAV sync behind Traefik
 - `traefik/`: Reverse proxy + TLS (Let's Encrypt DNS challenge with Cloudflare) + Cloudflare DDNS
 - `uptime-kuma/`: Uptime Kuma monitoring dashboard
 - `vscode/`: code-server exposed behind Traefik + Authentik
@@ -49,6 +50,7 @@ docker compose logs -f
 - Nextcloud AIO: `https://nextcloud.thomega.fr`
 - OpenSpeedTest: `https://speed.thomega.fr`
 - Portainer: `https://portainer.thomega.fr`
+- Super Productivity: `https://sp.thomega.fr`
 - Traefik dashboard: `https://traefik.thomega.fr`
 - Authentik: `https://auth.thomega.fr`
 - Excalidraw: `https://draw.thomega.fr`

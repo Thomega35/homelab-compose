@@ -1,0 +1,57 @@
+services:
+  app:
+    image: johannesjo/super-productivity:latest
+    container_name: super-productivity
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      - WEBDAV_BASE_URL=${WEBDAV_BASE_URL:-https://sp.thomega.fr/webdav/}
+      - WEBDAV_USERNAME=${WEBDAV_USERNAME:-admin}
+      - WEBDAV_SYNC_FOLDER_PATH=${WEBDAV_SYNC_FOLDER_PATH:-/}
+      - SYNC_INTERVAL=${SYNC_INTERVAL:-15}
+      - IS_COMPRESSION_ENABLED=${IS_COMPRESSION_ENABLED:-true}
+      - IS_ENCRYPTION_ENABLED=${IS_ENCRYPTION_ENABLED:-false}
+    depends_on:
+      - webdav
+    networks:
+      - traefik-net
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=${TRAEFIK_NETWORK_NAME:-traefik-net}'
+      - 'traefik.http.routers.super-productivity.rule=Host(`${SUPER_PRODUCTIVITY_HOST:-sp.thomega.fr}`)'
+      - 'traefik.http.routers.super-productivity.entryPoints=${TRAEFIK_ENTRYPOINT:-websecure}'
+      - 'traefik.http.routers.super-productivity.tls=true'
+      - 'traefik.http.services.super-productivity.loadbalancer.server.port=80'
+
+  webdav:
+    image: bytemark/webdav:2.4
+    container_name: super-productivity-webdav
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      - AUTH_TYPE=Basic
+      - USERNAME=${WEBDAV_USERNAME:-admin}
+      - PASSWORD=${WEBDAV_PASSWORD:-change_me_strong_password}
+    volumes:
+      - webdav_data:/var/lib/dav
+    networks:
+      - traefik-net
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=${TRAEFIK_NETWORK_NAME:-traefik-net}'
+      - 'traefik.http.routers.super-productivity-webdav.rule=Host(`${SUPER_PRODUCTIVITY_HOST:-sp.thomega.fr}`) && PathPrefix(`/webdav`)'
+      - 'traefik.http.routers.super-productivity-webdav.entryPoints=${TRAEFIK_ENTRYPOINT:-websecure}'
+      - 'traefik.http.routers.super-productivity-webdav.tls=true'
+      - 'traefik.http.routers.super-productivity-webdav.middlewares=super-productivity-webdav-strip'
+      - 'traefik.http.middlewares.super-productivity-webdav-strip.stripprefix.prefixes=/webdav'
+      - 'traefik.http.services.super-productivity-webdav.loadbalancer.server.port=80'
+
+volumes:
+  webdav_data:
+
+networks:
+  traefik-net:
+    name: ${TRAEFIK_NETWORK_NAME:-traefik-net}
+    external: true
