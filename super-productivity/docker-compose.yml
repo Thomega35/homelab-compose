@@ -23,6 +23,7 @@ services:
       - 'traefik.http.routers.super-productivity.entryPoints=${TRAEFIK_ENTRYPOINT:-websecure}'
       - 'traefik.http.routers.super-productivity.tls=true'
       - 'traefik.http.services.super-productivity.loadbalancer.server.port=80'
+      - 'traefik.http.routers.super-productivity.middlewares=authentik-auth@docker'
 
   webdav:
     image: bytemark/webdav:2.4

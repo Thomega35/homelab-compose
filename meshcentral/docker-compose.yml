@@ -29,6 +29,8 @@ services:
       - 'traefik.http.services.meshcentral.loadbalancer.server.port=443'
       - 'traefik.http.services.meshcentral.loadbalancer.server.scheme=https'
       - 'traefik.docker.network=traefik-net'
+      - 'traefik.http.routers.meshcentral.middlewares=authentik-auth@docker'
+      # No authentik for now, as it breaks the meshcentral fonctionality?
 
 networks:
   traefik-net:
