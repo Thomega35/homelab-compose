@@ -1,0 +1,21 @@
+services:
+  hbbr:
+    image: rustdesk/rustdesk-server:1.1.15
+    container_name: rustdesk-hbbr
+    command: hbbr
+    volumes:
+      - /data/rustdesk:/root
+    network_mode: host
+    restart: unless-stopped
+
+  hbbs:
+    image: rustdesk/rustdesk-server:1.1.15
+    container_name: rustdesk-hbbs
+    command: hbbs
+    volumes:
+      - /data/rustdesk:/root
+    network_mode: host
+    depends_on:
+      - hbbr
+    restart: unless-stopped
+# TODO Open port
