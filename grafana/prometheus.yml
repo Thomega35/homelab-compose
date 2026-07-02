@@ -20,4 +20,24 @@ scrape_configs:
   - job_name: 'grafana'
     static_configs:
       - targets: ['grafana:3000']
+    metrics_path: /metrics
+
+  # Authentik core and worker metrics on the built-in Prometheus port
+  - job_name: 'authentik-server'
+    static_configs:
+      - targets: ['authentik_server:9300']
+
+  - job_name: 'authentik-worker'
+    static_configs:
+      - targets: ['authentik_worker:9300']
+
+  # Traefik built-in Prometheus metrics endpoint
+  - job_name: 'traefik'
+    static_configs:
+      - targets: ['traefik:8082']
+
+  # DaWarich exporter (enabled in the app and sidekiq containers)
+  - job_name: 'dawarich'
+    static_configs:
+      - targets: ['dawarich_app:9394']
 
