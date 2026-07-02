@@ -8,20 +8,11 @@ services:
       - traefik-net
     volumes:
       - /data/meshcentral/data:/opt/meshcentral/meshcentral-data
+      - ./config.json:/opt/meshcentral/meshcentral-data/config.json:ro
       - /data/meshcentral/user_files:/opt/meshcentral/meshcentral-files
       - /data/meshcentral/backups:/opt/meshcentral/meshcentral-backups
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-    environment:
-      - HOSTNAME=mesh.thomega.fr
-      - REVERSE_PROXY=mesh.thomega.fr
-      - REVERSE_PROXY_TLS_PORT=443
-      - IFRAME=false
-      - ALLOW_NEW_ACCOUNTS=false
-      - WEBRTC=false
-      - BACKUPS_PW=${ADMIN_PASSWORD}
-      - BACKUP_INTERVAL=24
-      - BACKUP_KEEP_DAYS=10
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.meshcentral.rule=Host(`mesh.thomega.fr`)'
@@ -29,8 +20,6 @@ services:
       - 'traefik.http.services.meshcentral.loadbalancer.server.port=443'
       - 'traefik.http.services.meshcentral.loadbalancer.server.scheme=https'
       - 'traefik.docker.network=traefik-net'
-      - 'traefik.http.routers.meshcentral.middlewares=authentik-auth@docker'
-      # No authentik for now, as it breaks the meshcentral fonctionality?
 
 networks:
   traefik-net:

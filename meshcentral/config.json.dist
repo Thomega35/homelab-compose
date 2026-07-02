@@ -1,0 +1,45 @@
+{
+  "$schema": "http://info.meshcentral.com/downloads/meshcentral-config-schema.json",
+  "settings": {
+    "cert": "mesh.example.com",
+    "sessionKey": "change_this_to_a_stable_session_key",
+    "port": 443,
+    "redirPort": 80,
+    "AgentPong": 300,
+    "TLSOffload": false,
+    "SelfUpdate": false,
+    "AllowFraming": false,
+    "WebRTC": false,
+    "AutoBackup": {
+      "backupPath": "/opt/meshcentral/meshcentral-backups",
+      "backupIntervalHours": 24,
+      "keepLastDaysBackup": 10,
+      "zippassword": "change_this_to_a_strong_backup_password"
+    }
+  },
+  "domains": {
+    "": {
+      "NewAccounts": false,
+      "certUrl": "https://mesh.example.com:443",
+      "authStrategies": {
+        "oidc": {
+          "issuer": {
+            "issuer": "https://auth.example.com/application/o/meshcentral/"
+          },
+          "client": {
+            "client_id": "your_authentik_client_id_here",
+            "client_secret": "your_authentik_client_secret_here",
+            "redirect_uri": "https://mesh.example.com/auth-oidc-callback",
+            "post_logout_redirect_uri": "https://mesh.example.com/login"
+          },
+          "newAccounts": true,
+          "groups": {
+            "siteadmin": [
+              "admin"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
