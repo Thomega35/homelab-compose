@@ -22,7 +22,6 @@ services:
       - 'traefik.http.routers.portainer.rule=Host(`${PORTAINER_HOST:-portainer.thomega.fr}`)'
       - 'traefik.http.routers.portainer.entryPoints=${TRAEFIK_ENTRYPOINT:-websecure}'
       - 'traefik.http.routers.portainer.tls=true'
-      - 'traefik.http.routers.portainer.middlewares=authentik-auth@docker'
       - 'traefik.http.services.portainer.loadbalancer.server.port=9000'
 
 networks:
