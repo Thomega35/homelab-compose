@@ -1,0 +1,24 @@
+services:
+  bentopdf:
+    image: ghcr.io/alam00000/bentopdf-simple:latest
+    container_name: bentopdf
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - traefik-net
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.bentopdf.rule=Host(`pdf.thomega.fr`)'
+      - 'traefik.http.routers.bentopdf.entryPoints=websecure'
+      - 'traefik.http.services.bentopdf.loadbalancer.server.port=8080'
+      - 'traefik.docker.network=traefik-net'
+      - 'traefik.http.routers.bentopdf.middlewares=authentik-auth@docker'
+
+networks:
+  traefik-net:
+    external: true
+    name: traefik-net
