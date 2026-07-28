@@ -9,6 +9,7 @@ services:
       - TZ=Europe/Paris
       - HOME=/home/thome
     volumes:
+      - /data:/data
       - /data/vscode/config:/home/thome/.config
       - /data/vscode/local:/home/thome/.local
       - /home/thome:/home/thome
