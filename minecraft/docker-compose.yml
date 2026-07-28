@@ -1,0 +1,35 @@
+services:
+  mc:
+    image: itzg/minecraft-server
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    ports:
+      - "25565:25565"
+      - "8124:8100"
+    environment:
+      EULA: "TRUE"
+      VERSION: "26.2"
+      TYPE: "PAPER"
+      MAX_MEMORY: "4G"
+      ENABLE_AUTOPAUSE: "false"
+      JVM_DD_OPTS: "disable.watchdog:true"
+      MAX_TICK_TIME: "-1"
+      ENABLE_WHITELIST: false
+      OPS: "${OPS}"
+      # BlueMap v5.22 - compatible with MC 26.2 and Java 25
+      PLUGINS: |
+        https://github.com/BlueMap-Minecraft/BlueMap/releases/download/v5.22/bluemap-5.22-paper.jar
+    volumes:
+      # attach the relative directory 'data' to the container's /data path
+      - /data/minecraft:/data
+    networks:
+      - traefik-net
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.bluemap.rule=Host(`minecraft.thomega.fr`)'
+      - 'traefik.http.routers.bluemap.entryPoints=websecure'
+      - 'traefik.http.services.bluemap.loadbalancer.server.port=8100'
+networks:
+  traefik-net:
+    external: true
