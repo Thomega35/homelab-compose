@@ -7,6 +7,7 @@ services:
     ports:
       - "25565:25565"
       - "8124:8100"
+      - "24454:24454/udp"
     environment:
       EULA: "TRUE"
       VERSION: "26.2"
@@ -15,11 +16,16 @@ services:
       ENABLE_AUTOPAUSE: "false"
       JVM_DD_OPTS: "disable.watchdog:true"
       MAX_TICK_TIME: "-1"
+      VIEW_DISTANCE: "16"
+      SIMULATION_DISTANCE: "10"
+      SPAWN_PROTECTION: "0"
       ENABLE_WHITELIST: false
       OPS: "${OPS}"
-      # BlueMap v5.22 - compatible with MC 26.2 and Java 25
+      # BlueMap v5.22 - map visualization
+      # Voice Chat v2.6.21 - proximity voice
       PLUGINS: |
         https://github.com/BlueMap-Minecraft/BlueMap/releases/download/v5.22/bluemap-5.22-paper.jar
+        https://cdn.modrinth.com/data/9eGKb6K1/versions/62MVmInV/voicechat-bukkit-2.6.21.jar?mr_download_reason=standalone&mr_loader=bukkit
     volumes:
       # attach the relative directory 'data' to the container's /data path
       - /data/minecraft:/data
