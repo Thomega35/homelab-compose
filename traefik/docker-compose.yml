@@ -1,6 +1,7 @@
 services:
   traefik:
     image: traefik:v3.6
+    container_name: traefik
     command:
       - "--providers.docker=true"
       - "--certificatesresolvers.letsencrypt.acme.email=admin@thomega.fr"
@@ -25,11 +26,8 @@ services:
       - "--metrics.prometheus=true"
       - "--entryPoints.metrics.address=:8082"
       - "--metrics.prometheus.entryPoint=metrics"
-      # Ajoute ces lignes dans les commandes de ton container Traefik :
-      # https://docs.immich.app/administration/reverse-proxy/
-      - "--entrypoints.websecure.transport.respondingTimeouts.readTimeout=3600s"
-      - "--entrypoints.websecure.transport.respondingTimeouts.writeTimeout=3600s"
-      - "--entrypoints.websecure.transport.respondingTimeouts.idleTimeout=3600s"
+      # Reverts to the old behavior (no timeout)
+      - "--entrypoints.websecure.transport.respondingTimeouts.readTimeout=0s"
     environment:
       CLOUDFLARE_EMAIL: ${CLOUDFLARE_EMAIL}
       CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN}
