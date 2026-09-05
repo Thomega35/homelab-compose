@@ -23,6 +23,6 @@ remote_homeassistant:
   - host: 100.81.37.26
     port: 8123
     secure: false
-    access_token: "CHANGE_ME_REMOTE_HA_TOKEN"
+    access_token: !env_var REMOTE_HA_TOKEN
     entity_prefix: "rpi_"
     entity_friendly_name_prefix: "RPI"

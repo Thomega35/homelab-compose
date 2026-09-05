@@ -3,6 +3,8 @@ services:
     container_name: homeassistant
     hostname: homeassistant
     image: ghcr.io/home-assistant/home-assistant:2026.5
+    env_file:
+      - /data/Homeassistant/core/.env
     volumes:
       - /data/Homeassistant/core:/config
       - /etc/localtime:/etc/localtime:ro
@@ -25,3 +27,39 @@ services:
       - 'traefik.http.middlewares.homeassistant-sw-block-path.replacepath.path=/__blocked_service_worker__.js'
       - 'traefik.http.services.homeassistant.loadbalancer.server.port=8123'
       - 'traefik.docker.network=traefik-net'
+
+  zigbee2mqtt:
+    container_name: zigbee2mqtt
+    image: ghcr.io/koenkk/zigbee2mqtt:2.10.1
+    restart: unless-stopped
+    volumes:
+      - /data/Homeassistant/zigbee2mqtt:/app/data
+      - /run/udev:/run/udev:ro
+    environment:
+      - TZ=Europe/Berlin
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    networks:
+      - traefik-net
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.zigbee2mqtt.rule=Host(`zigbee2mqtt.thomega.fr`)'
+      - 'traefik.http.routers.zigbee2mqtt.entryPoints=websecure'
+      - 'traefik.http.services.zigbee2mqtt.loadbalancer.server.port=8080'
+      - 'traefik.http.routers.zigbee2mqtt.middlewares=authentik-auth@docker'
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0.22
+    volumes:
+      - /data/Homeassistant/mosquitto/config:/mosquitto/config
+      - /data/Homeassistant/mosquitto/data:/mosquitto/data
+    restart: unless-stopped
+    ports:
+      - 1883:1883
+    networks:
+      - traefik-net
+
+networks:
+  traefik-net:
+    external: true
+    name: traefik-net
