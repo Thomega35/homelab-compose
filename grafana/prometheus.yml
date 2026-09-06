@@ -36,8 +36,14 @@ scrape_configs:
     static_configs:
       - targets: ['traefik:8082']
 
-  # DaWarich exporter (enabled in the app and sidekiq containers)
   - job_name: 'dawarich'
+    metrics_path: /metrics
+    basic_auth:
+      username_file: /etc/prometheus/secrets/dawarich_metrics_username
+      password_file: /etc/prometheus/secrets/dawarich_metrics_password
     static_configs:
-      - targets: ['dawarich_app:9394']
+      - targets: ['dawarich_app:3000']
 
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
