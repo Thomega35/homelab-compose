@@ -4,9 +4,11 @@ services:
     tty: true
     stdin_open: true
     restart: unless-stopped
+    container_name: minecraft
     ports:
       - "25565:25565"
       - "8124:8100"
+      - "8899:8899" # KOKOTO WebChat HTTP & WebSocket port
       - "24454:24454/udp"
     environment:
       EULA: "TRUE"
@@ -23,19 +25,35 @@ services:
       OPS: "${OPS}"
       # BlueMap v5.22 - map visualization
       # Voice Chat v2.6.21 - proximity voice
+      # KOKOTO WebChat v5.2.0 - web chat
+      # DiscordSRV v1.29.0 - discord chat bridge
       PLUGINS: |
         https://github.com/BlueMap-Minecraft/BlueMap/releases/download/v5.22/bluemap-5.22-paper.jar
         https://cdn.modrinth.com/data/9eGKb6K1/versions/62MVmInV/voicechat-bukkit-2.6.21.jar?mr_download_reason=standalone&mr_loader=bukkit
+        https://github.com/KOKOTO-DEV/KOKOTO-WebChat/releases/download/v5.2.0/KOKOTO-WebChat-5.2.0-Bukkit-1.18-26.2.jar
+        https://cdn.modrinth.com/data/UmLGoGij/versions/MK210KrY/DiscordSRV-Build-1.29.0.jar
     volumes:
-      # attach the relative directory 'data' to the container's /data path
       - /data/minecraft:/data
     networks:
       - traefik-net
     labels:
       - 'traefik.enable=true'
+      - 'traefik.docker.network=traefik-net'
+
+      # BlueMap Web UI Router
       - 'traefik.http.routers.bluemap.rule=Host(`minecraft.thomega.fr`)'
       - 'traefik.http.routers.bluemap.entryPoints=websecure'
-      - 'traefik.http.services.bluemap.loadbalancer.server.port=8100'
+      - 'traefik.http.routers.bluemap.service=bluemap-svc'
+      - 'traefik.http.routers.bluemap.priority=1'
+      - 'traefik.http.services.bluemap-svc.loadbalancer.server.port=8100'
+
+      # KOKOTO WebChat API & WebSocket Router
+      - 'traefik.http.routers.kokoto.rule=Host(`minecraft.thomega.fr`) && (PathPrefix(`/api`) || PathPrefix(`/kokoto`) || PathPrefix(`/chat`))'
+      - 'traefik.http.routers.kokoto.entryPoints=websecure'
+      - 'traefik.http.routers.kokoto.service=kokoto-svc'
+      - 'traefik.http.routers.kokoto.priority=10'
+      - 'traefik.http.services.kokoto-svc.loadbalancer.server.port=8899'
+
 networks:
   traefik-net:
     external: true
