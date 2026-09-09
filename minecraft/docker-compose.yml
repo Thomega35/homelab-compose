@@ -27,11 +27,13 @@ services:
       # Voice Chat v2.6.21 - proximity voice
       # KOKOTO WebChat v5.2.0 - web chat
       # DiscordSRV v1.29.0 - discord chat bridge
+      # Craftable Invisible Frames v2.4.1 - invisible item frames
       PLUGINS: |
         https://github.com/BlueMap-Minecraft/BlueMap/releases/download/v5.22/bluemap-5.22-paper.jar
         https://cdn.modrinth.com/data/9eGKb6K1/versions/62MVmInV/voicechat-bukkit-2.6.21.jar?mr_download_reason=standalone&mr_loader=bukkit
         https://github.com/KOKOTO-DEV/KOKOTO-WebChat/releases/download/v5.2.0/KOKOTO-WebChat-5.2.0-Bukkit-1.18-26.2.jar
         https://cdn.modrinth.com/data/UmLGoGij/versions/MK210KrY/DiscordSRV-Build-1.29.0.jar
+        https://cdn.modrinth.com/data/wtE6hwEA/versions/snCgr9QJ/craftableinvframes-2.4.1.jar?mr_download_reason=standalone&mr_loader=paper
     volumes:
       - /data/minecraft:/data
     networks:
