@@ -1,6 +1,6 @@
 services:
   nextcloud:
-    image: nextcloud:32.0.8
+    image: nextcloud:34.0.4
     depends_on:
       postgres:
         condition: service_healthy
@@ -33,7 +33,7 @@ services:
       - nextcloud-internal
 
   postgres:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     restart: unless-stopped
     environment:
       - POSTGRES_DB=nextcloud
@@ -46,7 +46,7 @@ services:
       retries: 10
       start_period: 20s
     volumes:
-      - nextcloud_postgres_data:/var/lib/postgresql/data
+      - nextcloud_postgres18_data:/var/lib/postgresql
     networks:
       - nextcloud-internal
 
@@ -71,3 +71,4 @@ networks:
 
 volumes:
   nextcloud_postgres_data:
+  nextcloud_postgres18_data:
