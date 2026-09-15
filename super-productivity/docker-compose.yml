@@ -1,6 +1,6 @@
 services:
   app:
-    image: johannesjo/super-productivity:latest
+    image: johannesjo/super-productivity:v19.0.1
     container_name: super-productivity
     restart: unless-stopped
     env_file:
