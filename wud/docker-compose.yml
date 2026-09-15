@@ -1,0 +1,26 @@
+services:
+  wud:
+    image: getwud/wud:latest
+    container_name: wud
+    env_file:
+      - ./.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /data/wud:/store
+    environment:
+      - WUD_LOG_LEVEL=info
+    restart: unless-stopped
+    networks:
+      - traefik-net
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=traefik-net'
+      - 'traefik.http.routers.wud.rule=Host(`${WUD_HOST:-wud.thomega.fr}`)'
+      - 'traefik.http.routers.wud.entryPoints=websecure'
+      - 'traefik.http.routers.wud.tls=true'
+      - 'traefik.http.routers.wud.middlewares=authentik-auth@docker'
+      - 'traefik.http.services.wud.loadbalancer.server.port=3000'
+
+networks:
+  traefik-net:
+    external: true
