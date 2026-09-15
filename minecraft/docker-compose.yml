@@ -23,6 +23,9 @@ services:
       SPAWN_PROTECTION: "0"
       ENABLE_WHITELIST: false
       OPS: "${OPS}"
+      # Enderite Mod: Fabric/NeoForge only; not compatible with Paper plugins.
+      # Correct Modrinth URL: https://cdn.modrinth.com/data/6lvRWqbA/versions/ztz5xOet/enderitemod-neoforge-26.2-1.9.1.jar
+      # Fabric alternative: https://cdn.modrinth.com/data/6lvRWqbA/versions/vJAJXXxF/enderitemod-fabric-26.2-1.9.1.jar
       # BlueMap v5.22 - map visualization
       # Voice Chat v2.6.21 - proximity voice
       # KOKOTO WebChat v5.2.0 - web chat
