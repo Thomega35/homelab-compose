@@ -8,12 +8,11 @@ services:
     ports:
       - "25565:25565"
       - "8124:8100"
-      - "8899:8899" # KOKOTO WebChat HTTP & WebSocket port
       - "24454:24454/udp"
     environment:
       EULA: "TRUE"
       VERSION: "26.2"
-      TYPE: "PAPER"
+      TYPE: "FABRIC"
       MAX_MEMORY: "4G"
       ENABLE_AUTOPAUSE: "false"
       JVM_DD_OPTS: "disable.watchdog:true"
@@ -23,20 +22,20 @@ services:
       SPAWN_PROTECTION: "0"
       ENABLE_WHITELIST: false
       OPS: "${OPS}"
-      # Enderite Mod: Fabric/NeoForge only; not compatible with Paper plugins.
-      # Correct Modrinth URL: https://cdn.modrinth.com/data/6lvRWqbA/versions/ztz5xOet/enderitemod-neoforge-26.2-1.9.1.jar
-      # Fabric alternative: https://cdn.modrinth.com/data/6lvRWqbA/versions/vJAJXXxF/enderitemod-fabric-26.2-1.9.1.jar
+      # Fabric API - required dependency for the mods below
       # BlueMap v5.22 - map visualization
-      # Voice Chat v2.6.21 - proximity voice
-      # KOKOTO WebChat v5.2.0 - web chat
-      # DiscordSRV v1.29.0 - discord chat bridge
-      # Craftable Invisible Frames v2.4.1 - invisible item frames
-      PLUGINS: |
-        https://github.com/BlueMap-Minecraft/BlueMap/releases/download/v5.22/bluemap-5.22-paper.jar
-        https://cdn.modrinth.com/data/9eGKb6K1/versions/62MVmInV/voicechat-bukkit-2.6.21.jar?mr_download_reason=standalone&mr_loader=bukkit
-        https://github.com/KOKOTO-DEV/KOKOTO-WebChat/releases/download/v5.2.0/KOKOTO-WebChat-5.2.0-Bukkit-1.18-26.2.jar
-        https://cdn.modrinth.com/data/UmLGoGij/versions/MK210KrY/DiscordSRV-Build-1.29.0.jar
-        https://cdn.modrinth.com/data/wtE6hwEA/versions/snCgr9QJ/craftableinvframes-2.4.1.jar?mr_download_reason=standalone&mr_loader=paper
+      # Voice Chat v2.6.22 - proximity voice
+      # Voice Chat Discord Bridge v3.2.1 - links voice chat proximity audio with Discord
+      # Invisible Frames v2.0.1 - allows frame items to be invisible while preserving function
+      # Discord MC Chat v2.7.1 - DiscordSRV replacement: text chat bridge to Discord (DiscordSRV has no Fabric build)
+      # Enderite Mod dropped: requires matching client-side install, blocking unmodded players from joining
+      MODS: |
+        https://cdn.modrinth.com/data/P7dR8mSH/versions/UWwhUX3k/fabric-api-0.160.0%2B26.2.jar
+        https://github.com/BlueMap-Minecraft/BlueMap/releases/download/v5.22/bluemap-5.22-fabric.jar
+        https://cdn.modrinth.com/data/9eGKb6K1/versions/DKSq5wO6/voicechat-fabric-2.6.22%2B26.2.jar
+        https://cdn.modrinth.com/data/S1jG5YV5/versions/V3XoOhMl/voicechat-discord-fabric-26.1-3.2.1.jar
+        https://cdn.modrinth.com/data/QD87oMUf/versions/ELIgkzTp/invisibleframes-fabric-2.0.1%2B26.2.jar
+        https://cdn.modrinth.com/data/D0sHdnXY/versions/8HnBxTfE/Discord-MC-Chat-2.7.1-compat.2.jar
     volumes:
       - /data/minecraft:/data
     networks:
@@ -51,13 +50,6 @@ services:
       - 'traefik.http.routers.bluemap.service=bluemap-svc'
       - 'traefik.http.routers.bluemap.priority=1'
       - 'traefik.http.services.bluemap-svc.loadbalancer.server.port=8100'
-
-      # KOKOTO WebChat API & WebSocket Router
-      - 'traefik.http.routers.kokoto.rule=Host(`minecraft.thomega.fr`) && (PathPrefix(`/api`) || PathPrefix(`/kokoto`) || PathPrefix(`/chat`))'
-      - 'traefik.http.routers.kokoto.entryPoints=websecure'
-      - 'traefik.http.routers.kokoto.service=kokoto-svc'
-      - 'traefik.http.routers.kokoto.priority=10'
-      - 'traefik.http.services.kokoto-svc.loadbalancer.server.port=8899'
 
 networks:
   traefik-net:
