@@ -20,7 +20,8 @@ services:
       VIEW_DISTANCE: "16"
       SIMULATION_DISTANCE: "10"
       SPAWN_PROTECTION: "0"
-      ENABLE_WHITELIST: false
+      ENABLE_WHITELIST: "true"
+      WHITELIST: "${WHITELIST}"
       OPS: "${OPS}"
       # Fabric API - required dependency for the mods below
       # BlueMap v5.22 - map visualization
