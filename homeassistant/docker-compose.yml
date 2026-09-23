@@ -2,7 +2,7 @@ services:
   homeassistant:
     container_name: homeassistant
     hostname: homeassistant
-    image: ghcr.io/home-assistant/home-assistant:2026.5
+    image: ghcr.io/home-assistant/home-assistant:2026.9
     env_file:
       - /data/Homeassistant/core/.env
     volumes:
@@ -30,7 +30,7 @@ services:
 
   zigbee2mqtt:
     container_name: zigbee2mqtt
-    image: ghcr.io/koenkk/zigbee2mqtt:2.10.1
+    image: ghcr.io/koenkk/zigbee2mqtt:2.14.1
     restart: unless-stopped
     volumes:
       - /data/Homeassistant/zigbee2mqtt:/app/data
@@ -49,7 +49,7 @@ services:
       - 'traefik.http.routers.zigbee2mqtt.middlewares=authentik-auth@docker'
 
   mosquitto:
-    image: eclipse-mosquitto:2.0.22
+    image: eclipse-mosquitto:2.1.2-alpine
     volumes:
       - /data/Homeassistant/mosquitto/config:/mosquitto/config
       - /data/Homeassistant/mosquitto/data:/mosquitto/data

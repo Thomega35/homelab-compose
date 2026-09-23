@@ -1,6 +1,6 @@
 services:
   app:
-    image: alswl/excalidraw:v0.18.1-fork-b1
+    image: alswl/excalidraw:v0.18.1-fork-b2
     restart: unless-stopped
     healthcheck:
       disable: true

@@ -1,6 +1,6 @@
 services:
   grampsweb: &grampsweb
-    image: ghcr.io/gramps-project/grampsweb:latest
+    image: ghcr.io/gramps-project/grampsweb:26.9.1
     restart: unless-stopped
     environment:
       GRAMPSWEB_TREE: "Arbre Thomas Delapart"
@@ -39,7 +39,7 @@ services:
     command: celery -A gramps_webapi.celery worker --loglevel=INFO
 
   grampsweb_redis:
-    image: redis:7-alpine
+    image: redis:8.10.2
     restart: unless-stopped
     command: ["redis-server", "--save", "", "--appendonly", "no"]
     networks:
