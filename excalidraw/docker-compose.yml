@@ -1,6 +1,6 @@
 services:
   app:
-    image: alswl/excalidraw:v0.18.0-fork-b1
+    image: alswl/excalidraw:v0.18.1-fork-b1
     restart: unless-stopped
     healthcheck:
       disable: true
@@ -54,7 +54,7 @@ services:
       - "traefik.http.services.draw-room.loadbalancer.server.port=80"
 
   mongodb:
-    image: mongo:7.0.5-jammy
+    image: mongo:8.3.11
     restart: unless-stopped
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER}

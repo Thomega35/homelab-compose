@@ -1,6 +1,6 @@
 services:
   bentopdf:
-    image: ghcr.io/alam00000/bentopdf-simple:latest
+    image: ghcr.io/alam00000/bentopdf-simple:sha-daae736
     container_name: bentopdf
     restart: unless-stopped
     healthcheck:

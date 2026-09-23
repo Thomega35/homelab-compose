@@ -75,7 +75,7 @@ services:
     restart: unless-stopped
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    image: gcr.io/cadvisor/cadvisor:v0.55.1
     restart: unless-stopped
     userns_mode: "host"
     networks:
@@ -96,7 +96,7 @@ services:
 
   # Node Exporter - Métriques de l'hôte (CPU, RAM, etc.)
   node-exporter:
-    image: prom/node-exporter:v1.11.1
+    image: prom/node-exporter:v1.12.1
     container_name: node-exporter
     restart: unless-stopped
     volumes:
