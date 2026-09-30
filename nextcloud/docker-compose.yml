@@ -1,6 +1,6 @@
 services:
   nextcloud:
-    image: nextcloud:35.0.0
+    image: nextcloud:35.0.1
     depends_on:
       postgres:
         condition: service_healthy
