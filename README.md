@@ -9,6 +9,7 @@ Simple Docker Compose files for my homelab services.
 - `grafana/`: Observability stack (Grafana, Prometheus, Loki, Alloy, Node Exporter)
 - `homeassistant/`: Home Assistant
 - `immich-app/`: Immich stack (server, ML, Redis, Postgres)
+- `lan-orangutan/`: LAN Orangutan network device scanner (host network)
 - `meshcentral/`: MeshCentral remote device management
 - `nextcloud/`: Nextcloud AIO master container
 - `openspeedtest/`: OpenSpeedTest self-hosted speed test server
@@ -48,6 +49,7 @@ docker compose logs -f
 - Prometheus: `https://prometheus.thomega.fr`
 - Home Assistant: `https://home.thomega.fr`
 - Immich: `https://photo.thomega.fr`
+- LAN Orangutan: `https://lano.thomega.fr`
 - Nextcloud AIO: `https://nextcloud.thomega.fr`
 - OpenSpeedTest: `https://speed.thomega.fr`
 - Portainer: `https://portainer.thomega.fr`
