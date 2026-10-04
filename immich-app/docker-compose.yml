@@ -19,6 +19,7 @@ services:
       - immich-net
       - traefik-net
     labels:
+      - 'wud.tag.exclude=(alpha|beta|rc)'
       - 'traefik.enable=true'
       - 'traefik.http.routers.immich.rule=Host(`photo.thomega.fr`)'
       - 'traefik.http.routers.immich.entryPoints=websecure'
@@ -33,6 +34,8 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    labels:
+      - 'wud.tag.exclude=(alpha|beta|rc)'
     networks:
       - immich-net
 
@@ -59,7 +62,7 @@ services:
       - immich-net
 
   immich-kiosk:
-    image: ghcr.io/damongolding/immich-kiosk:latest
+    image: ghcr.io/damongolding/immich-kiosk:0.44.1
     container_name: immich-kiosk
     tty: true
     env_file:

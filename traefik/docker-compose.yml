@@ -60,6 +60,9 @@ services:
       PROXIED: ${CF_DDNS_THOMEGA_PROXIED:-false}
       IP6_PROVIDER: ${CF_DDNS_IP6_PROVIDER:-none}
       TZ: ${TZ:-UTC}
+    labels:
+      - 'wud.tag.include=^\d+$$'
+      - 'wud.watch.digest=true'
     restart: unless-stopped
 
   cloudflare-ddns-fanfare:
@@ -70,6 +73,9 @@ services:
       PROXIED: ${CF_DDNS_FANFARE_PROXIED:-true}
       IP6_PROVIDER: ${CF_DDNS_IP6_PROVIDER:-none}
       TZ: ${TZ:-UTC}
+    labels:
+      - 'wud.tag.include=^\d+$$'
+      - 'wud.watch.digest=true'
     restart: unless-stopped
 
 networks:

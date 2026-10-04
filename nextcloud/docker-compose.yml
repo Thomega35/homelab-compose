@@ -35,6 +35,8 @@ services:
   postgres:
     image: postgres:18-alpine
     restart: unless-stopped
+    labels:
+      - 'wud.tag.include=^\d+-alpine$$'
     environment:
       - POSTGRES_DB=nextcloud
       - POSTGRES_USER=nextcloud
@@ -51,8 +53,10 @@ services:
       - nextcloud-internal
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     restart: unless-stopped
+    labels:
+      - 'wud.tag.include=^\d+-alpine$$'
     command: ["redis-server", "--save", "", "--appendonly", "no"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]

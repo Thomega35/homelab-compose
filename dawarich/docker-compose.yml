@@ -20,10 +20,12 @@ services:
       timeout: 10s
 
   dawarich_db:
-    image: postgis/postgis:17-3.5-alpine
-    # image: imresamu/postgis:17-3.5-alpine # If you're on ARM architecture, use this image instead
+    image: postgis/postgis:17-3.6-alpine
+    # image: imresamu/postgis:17-3.6-alpine # If you're on ARM architecture, use this image instead
     shm_size: 1G
     container_name: dawarich_db
+    labels:
+      - 'wud.tag.include=^17-\d+\.\d+-alpine$$'
     volumes:
       - /data/dawarich/db_data:/var/lib/postgresql/data
       - /data/dawarich/shared:/var/shared
@@ -43,7 +45,7 @@ services:
     # command: postgres -c config_file=/etc/postgresql/postgresql.conf # Use custom config, uncomment if you want to use a custom config
 
   dawarich_app:
-    image: freikin/dawarich:1.15.2
+    image: freikin/dawarich:1.15.3
     container_name: dawarich_app
     volumes:
       - /data/dawarich/public:/var/app/public
@@ -121,7 +123,7 @@ services:
       - 'traefik.http.services.dawarich.loadbalancer.server.port=3000'
 
   dawarich_sidekiq:
-    image: freikin/dawarich:1.15.2
+    image: freikin/dawarich:1.15.3
     container_name: dawarich_sidekiq
     volumes:
       - /data/dawarich/public:/var/app/public
