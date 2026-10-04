@@ -5,7 +5,6 @@ Simple Docker Compose files for my homelab services.
 ## Services
 
 - `authentik/`: Identity provider and forward-auth middleware for Traefik
-- `excalidraw/`: Excalidraw collaborative whiteboard (app + storage + room + MongoDB)
 - `grafana/`: Observability stack (Grafana, Prometheus, Loki, Alloy, Node Exporter)
 - `homeassistant/`: Home Assistant
 - `immich-app/`: Immich stack (server, ML, Redis, Postgres)
@@ -57,7 +56,6 @@ docker compose logs -f
 - Super Productivity: `https://sp.thomega.fr`
 - Traefik dashboard: `https://traefik.thomega.fr`
 - Authentik: `https://auth.thomega.fr`
-- Excalidraw: `https://draw.thomega.fr`
 - MeshCentral: `https://mesh.thomega.fr`
 - Pi-hole: `https://hole.thomega.fr`
 - Uptime Kuma: `https://upk.thomega.fr`
