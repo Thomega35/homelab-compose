@@ -2,7 +2,7 @@ services:
   homeassistant:
     container_name: homeassistant
     hostname: homeassistant
-    image: ghcr.io/home-assistant/home-assistant:2026.9
+    image: ghcr.io/home-assistant/home-assistant:2026.10
     env_file:
       - /data/Homeassistant/core/.env
     volumes:

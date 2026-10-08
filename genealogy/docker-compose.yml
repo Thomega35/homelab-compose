@@ -1,6 +1,6 @@
 services:
   grampsweb: &grampsweb
-    image: ghcr.io/gramps-project/grampsweb:26.9.1
+    image: ghcr.io/gramps-project/grampsweb:26.10.0
     restart: unless-stopped
     environment:
       GRAMPSWEB_TREE: "Arbre Thomas Delapart"
