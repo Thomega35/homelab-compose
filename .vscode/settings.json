@@ -1,0 +1,11 @@
+{
+  "files.watcherExclude": {
+    "**/immich-app/library/**": true,
+    "**/immich-app/postgres/**": true,
+    "**/homeassistant/config/**": true
+  },
+  "search.exclude": {
+    "**/immich-app/library": true,
+    "**/immich-app/postgres": true
+  }
+}
