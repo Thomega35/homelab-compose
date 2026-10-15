@@ -32,6 +32,7 @@ services:
       # Enderite Mod dropped: requires matching client-side install, blocking unmodded players from joining
       # XXL Ender Chest v1.1.6 - Fabric mod for Minecraft 26.2
       # Functional Trims v2.3.0 - server-side armor trim effects, vanilla clients can join
+      # TrimEffects 1.21.x-26.2 - datapack packaged as a mod, server-side only
       MODS: |
         https://cdn.modrinth.com/data/P7dR8mSH/versions/UWwhUX3k/fabric-api-0.160.0%2B26.2.jar
         https://github.com/BlueMap-Minecraft/BlueMap/releases/download/v5.22/bluemap-5.22-fabric.jar
@@ -41,6 +42,7 @@ services:
         https://cdn.modrinth.com/data/D0sHdnXY/versions/8HnBxTfE/Discord-MC-Chat-2.7.1-compat.2.jar
         https://cdn.modrinth.com/data/Gq8wsb3l/versions/16J7zdIl/xxlenderchest-1.1.6.jar
         https://cdn.modrinth.com/data/7RjmQ2PI/versions/cW04Biq9/functional_trims-fabric-2.3.0%2B26.2.jar
+        https://cdn.modrinth.com/data/Y8LxiJTw/versions/P1lbSQV3/trimeffects-1.21.x-26.2.jar
     volumes:
       - /data/minecraft:/data
     networks:
