@@ -48,7 +48,7 @@ services:
       retries: 10
       start_period: 20s
     volumes:
-      - nextcloud_postgres18_data:/var/lib/postgresql
+      - /data/nextcloud/postgres:/var/lib/postgresql
     networks:
       - nextcloud-internal
 
@@ -72,7 +72,3 @@ networks:
     external: true
     name: traefik-net
   nextcloud-internal:
-
-volumes:
-  nextcloud_postgres_data:
-  nextcloud_postgres18_data:
