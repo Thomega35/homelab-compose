@@ -26,7 +26,7 @@ services:
     extra_hosts:
       - "stats.grafana.org:127.0.0.1"
     volumes:
-      - grafana-data:/var/lib/grafana
+      - /data/grafana/grafana:/var/lib/grafana
     labels:
       - 'traefik.enable=true'
       - 'traefik.docker.network=traefik-net'
@@ -57,7 +57,7 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - ./secrets:/etc/prometheus/secrets:ro
-      - prometheus-data:/prometheus
+      - /data/grafana/prometheus:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -119,7 +119,7 @@ services:
       - "3100:3100"
     volumes:
       - ./loki-config.yml:/etc/loki/local-config.yaml
-      - loki-data:/loki
+      - /data/grafana/loki:/loki
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - monitoring
@@ -137,6 +137,7 @@ services:
       - "stats.grafana.org:127.0.0.1"
     volumes:
       - ./config.alloy:/etc/alloy/config.alloy:ro
+      - /data/grafana/alloy:/var/lib/alloy/data
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -150,8 +151,3 @@ networks:
     driver: bridge
   traefik-net:
     external: true
-
-volumes:
-  grafana-data:
-  prometheus-data:
-  loki-data:
