@@ -1,0 +1,12 @@
+# Raw Postgres data dirs: not consistent while running, covered by the dumps in DUMP_DIR
+/data/immich/postgres
+/data/nextcloud/postgres
+/data/authentik/postgres
+/data/dawarich/db_data
+
+# Immich: thumbs and encoded videos are regenerated from the originals, DB dumps are covered by DUMP_DIR
+/mnt/nas-images/thumbs
+/mnt/nas-images/encoded-video
+/mnt/nas-images/backups
+/mnt/nas-images/.thumbnails
+/mnt/nas-images/Thumbs.db

@@ -2,3 +2,5 @@
 config.json
 grafana/secrets/*
 !grafana/secrets/*.dist
+restic/secrets/*
+!restic/secrets/*.dist

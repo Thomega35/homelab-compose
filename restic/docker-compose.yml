@@ -1,0 +1,63 @@
+services:
+  restic:
+    container_name: restic
+    build:
+      dockerfile_inline: |
+        FROM restic/restic:0.19.1
+        RUN apk add --no-cache bash curl docker-cli tzdata
+        ENTRYPOINT []
+    image: homelab-restic:0.19.1
+    init: true # reap ssh-agent and other orphaned processes (crond doesn't)
+    # Host network: reach Home Assistant on 127.0.0.1:8123 and keep the host's hostname in snapshots
+    network_mode: host
+    env_file: .env
+    environment:
+      TZ: Europe/Paris
+    command:
+      - sh
+      - -c
+      - |
+        # Local NAS backup every 2 hours; Home Assistant backup daily at 02:00; pushed to the Pi NAS on Monday and Thursday at 02:00
+        cat > /etc/crontabs/root <<'EOF'
+        0 0,4,6,8,10,12,14,16,18,20,22 * * * /home/thome/homelab-compose/restic/backup.sh > /proc/1/fd/1 2>&1
+        0 2 * * 0,2,3,5,6 /home/thome/homelab-compose/restic/backup.sh --ha > /proc/1/fd/1 2>&1
+        0 2 * * 1,4 /home/thome/homelab-compose/restic/backup.sh --ha --push > /proc/1/fd/1 2>&1
+        EOF
+        exec crond -f -l 8
+    secrets:
+      - restic_password
+      - rpi_ssh_key
+      - rpi_ssh_passphrase
+      - rpi_known_hosts
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # docker exec for pg_dumpall
+      - /data:/data:ro
+      - /data/backups:/data/backups # Postgres dumps
+      - /home/thome/homelab-compose:/home/thome/homelab-compose:ro
+      - /home/thome/makabe:/home/thome/makabe:ro
+      - type: bind # NAS shares (Immich uploads); rslave so remounts are seen
+        source: /mnt
+        target: /mnt
+        read_only: true
+        bind:
+          propagation: rslave
+      - type: bind # restic repository on the NAS; fails to start if the NAS isn't mounted
+        source: /mnt/nas/backups
+        target: /mnt/nas/backups
+        bind:
+          create_host_path: false
+      - restic-cache:/root/.cache/restic
+    restart: unless-stopped
+
+secrets:
+  restic_password:
+    file: ./secrets/restic-password
+  rpi_ssh_key:
+    file: ./secrets/rpi-ssh-key
+  rpi_ssh_passphrase:
+    file: ./secrets/rpi-ssh-passphrase
+  rpi_known_hosts:
+    file: ./secrets/rpi-known-hosts
+
+volumes:
+  restic-cache:
