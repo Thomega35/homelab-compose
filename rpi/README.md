@@ -30,3 +30,20 @@ Start or update:
 ```bash
 sudo docker-compose up -d
 ```
+
+## Uptime Kuma (external watchdog, Tailscale only)
+
+- URL: http://100.81.37.26:3001
+- Data path: /data/uptime-kuma
+
+Start or update:
+
+```bash
+sudo docker-compose up -d
+```
+
+Monitors (checks the server from outside its network; add the Discord webhook as notification):
+
+- thome-server ping: 100.104.147.17
+- https://thomega.fr, https://auth.thomega.fr, https://photo.thomega.fr, https://nextcloud.thomega.fr, https://fanfare-makabes.fr
+- Main Uptime Kuma: http://100.104.147.17:3001
