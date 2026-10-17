@@ -14,6 +14,7 @@ Simple Docker Compose files for my homelab services.
 - `openspeedtest/`: OpenSpeedTest self-hosted speed test server
 - `pihole/`: Pi-hole DNS + DHCP (macvlan)
 - `portainer/`: Portainer CE container management UI
+- `qdirstat/`: QDirStat disk usage analyzer (host `/` mounted read-only) behind Traefik + Authentik
 - `rustdesk/`: RustDesk self-hosted server (hbbs + hbbr)
 - `super-productivity/`: Super Productivity + WebDAV sync behind Traefik
 - `traefik/`: Reverse proxy + TLS (Let's Encrypt DNS challenge with Cloudflare) + Cloudflare DDNS
@@ -52,6 +53,7 @@ docker compose logs -f
 - Nextcloud AIO: `https://nextcloud.thomega.fr`
 - OpenSpeedTest: `https://speed.thomega.fr`
 - Portainer: `https://portainer.thomega.fr`
+- QDirStat: `https://qdirstat.thomega.fr`
 - RustDesk server: `https://rust.thomega.fr`
 - Super Productivity: `https://sp.thomega.fr`
 - Traefik dashboard: `https://traefik.thomega.fr`

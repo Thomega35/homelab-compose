@@ -1,0 +1,28 @@
+services:
+  qdirstat:
+    image: docker.io/jlesage/qdirstat:latest
+    restart: unless-stopped
+    container_name: qdirstat
+    environment:
+      - TZ=Europe/Paris
+      - USER_ID=0   # root so every file on the host can be read
+      - GROUP_ID=0
+      - DARK_MODE=1
+      - KEEP_APP_RUNNING=1
+    volumes:
+      - /data/qdirstat/config:/config
+      - /:/storage:ro
+    networks:
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.qdirstat.rule=Host(`qdirstat.thomega.fr`)"
+      - "traefik.http.routers.qdirstat.entrypoints=websecure"
+      - "traefik.http.routers.qdirstat.tls.certresolver=letsencrypt"
+      - "traefik.http.services.qdirstat.loadbalancer.server.port=5800"
+      - "traefik.http.routers.qdirstat.middlewares=authentik-auth@docker"
+      - "traefik.docker.network=traefik-net"
+
+networks:
+  traefik-net:
+    external: true
