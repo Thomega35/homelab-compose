@@ -1,0 +1,88 @@
+services:
+  palworld:
+    image: thijsvanloef/palworld-server-docker:latest
+    container_name: palworld
+    restart: unless-stopped
+    stop_grace_period: 30s
+    ports:
+      - "8211:8211/udp"
+      - "27015:27015/udp"
+    env_file: .env
+    environment:
+      PUID: 1000
+      PGID: 1000
+      PORT: 8211
+      PLAYERS: 32
+      MULTITHREADING: "true"
+      COMMUNITY: "false"
+      TZ: "Europe/Paris"
+      RCON_ENABLED: "true"
+      # Required by the whitelist sidecar (port 8212 stays internal, not published)
+      REST_API_ENABLED: "true"
+      BACKUP_ENABLED: "true"
+      # Set to "true" to keep your friend's PalWorldSettings.ini untouched
+      # (otherwise env vars below/in .env overwrite it on every start)
+      DISABLE_GENERATE_SETTINGS: "false"
+    volumes:
+      - /data/palworld:/palworld
+
+  # Palworld has no native whitelist: kicks any player whose UID isn't listed
+  palworld-whitelist:
+    image: python:3.15-alpine
+    container_name: palworld-whitelist
+    labels:
+      - 'wud.tag.include=^\d+\.\d+-alpine$$'
+    command: python -u /app/whitelist.py
+    # WHITELIST is defined in .env
+    env_file: .env
+    volumes:
+      - ./whitelist.py:/app/whitelist.py:ro
+    depends_on:
+      - palworld
+    restart: unless-stopped
+
+  # Discord bot: message with Start/Stop buttons, auto-stop when empty
+  palworld-bot:
+    build: ./bot
+    image: palworld-bot
+    container_name: palworld-bot
+    labels:
+      - 'wud.watch=false'
+    env_file: .env
+    environment:
+      IDLE_MINUTES: 10
+    networks:
+      - default
+      - docker-proxy
+    depends_on:
+      - palworld-docker-proxy
+    restart: unless-stopped
+
+  # Filtered Docker API for the bot: only inspect/start/stop of the "palworld" container
+  # (regexes are auto-anchored with ^ and $)
+  palworld-docker-proxy:
+    image: wollomatic/socket-proxy:1
+    container_name: palworld-docker-proxy
+    # nobody:<docker group of the host socket>
+    user: "65534:124"
+    read_only: true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges
+    command:
+      - '-listenip=0.0.0.0'
+      - '-allowfrom=palworld-bot'
+      - '-allowGET=(/v[0-9.]+)?/containers/palworld/json'
+      - '-allowPOST=(/v[0-9.]+)?/containers/palworld/(start|stop)'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - docker-proxy
+    restart: unless-stopped
+
+networks:
+  # Only the bot can reach the Docker proxy
+  docker-proxy:
+    internal: true
