@@ -27,21 +27,26 @@ services:
       - /data/palworld:/palworld
 
   # Palworld has no native whitelist: kicks any player whose UID isn't listed
+  # (in WHITELIST or approved from Discord through the bot)
   palworld-whitelist:
     image: python:3.15-alpine
     container_name: palworld-whitelist
     labels:
       - 'wud.tag.include=^\d+\.\d+-alpine$$'
     command: python -u /app/whitelist.py
+    # Same user as the bot, both write in /data/palworld-whitelist (owned by 65534)
+    user: "65534:65534"
     # WHITELIST is defined in .env
     env_file: .env
     volumes:
       - ./whitelist.py:/app/whitelist.py:ro
+      - /data/palworld-whitelist:/data
     depends_on:
       - palworld
     restart: unless-stopped
 
-  # Discord bot: message with Start/Stop buttons, auto-stop when empty
+  # Discord bot: message with Start/Stop buttons, auto-stop when empty,
+  # Yes button whitelist requests for kicked unknown players
   palworld-bot:
     build: ./bot
     image: palworld-bot
@@ -51,6 +56,8 @@ services:
     env_file: .env
     environment:
       IDLE_MINUTES: 10
+    volumes:
+      - /data/palworld-whitelist:/data
     networks:
       - default
       - docker-proxy
