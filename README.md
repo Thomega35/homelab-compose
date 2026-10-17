@@ -7,6 +7,7 @@ Simple Docker Compose files for my homelab services.
 - `authentik/`: Identity provider and forward-auth middleware for Traefik
 - `grafana/`: Observability stack (Grafana, Prometheus, Loki, Alloy, Node Exporter)
 - `homeassistant/`: Home Assistant
+- `homepage/`: Custom homepage on `thomega.fr` (service status, server/NAS usage, Minecraft & Palworld overview) behind Authentik
 - `immich-app/`: Immich stack (server, ML, Redis, Postgres)
 - `lan-orangutan/`: LAN Orangutan network device scanner (host network)
 - `meshcentral/`: MeshCentral remote device management
@@ -45,6 +46,7 @@ docker compose logs -f
 
 ## URLs
 
+- Homepage: `https://thomega.fr`
 - Grafana: `https://grafana.thomega.fr`
 - Prometheus: `https://prometheus.thomega.fr`
 - Home Assistant: `https://home.thomega.fr`
@@ -66,4 +68,5 @@ docker compose logs -f
 ## Notes
 
 - `traefik/` creates the shared Docker network `traefik-net`; start this stack before other services that attach to it.
+- `homepage/` also joins `grafana_monitoring` (Loki) and `palworld_default` (Palworld REST API): start `grafana/` and `palworld/` first. Services and game settings are in `homepage/config.yml`.
 - `pihole/` uses macvlan with static IP `192.168.1.6` and wildcard DNS for `*.thomega.fr` routed to `192.168.1.5`.

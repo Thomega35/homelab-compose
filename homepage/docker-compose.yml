@@ -1,0 +1,64 @@
+services:
+  homepage:
+    build: .
+    image: homepage
+    container_name: homepage
+    env_file: .env
+    environment:
+      TZ: Europe/Paris
+    volumes:
+      - ./config.yml:/app/config.yml:ro
+    labels:
+      - 'wud.watch=false'
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=traefik-net'
+      - 'traefik.http.routers.homepage.rule=Host(`thomega.fr`)'
+      - 'traefik.http.routers.homepage.entrypoints=websecure'
+      - 'traefik.http.routers.homepage.middlewares=authentik-auth@docker'
+      - 'traefik.http.services.homepage.loadbalancer.server.port=8080'
+    networks:
+      - traefik-net # Traefik (service probes), Prometheus, Minecraft
+      - monitoring # Loki
+      - palworld # Palworld REST API
+      - docker-proxy
+    depends_on:
+      - homepage-docker-proxy
+    restart: unless-stopped
+
+  # Filtered Docker API: read-only container list for the status tiles,
+  # plus start/stop of the services that have a power button (config.yml)
+  # (regexes are auto-anchored with ^ and $)
+  homepage-docker-proxy:
+    image: wollomatic/socket-proxy:1
+    container_name: homepage-docker-proxy
+    # nobody:<docker group of the host socket>
+    user: "65534:124"
+    read_only: true
+    mem_limit: 64M
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges
+    command:
+      - '-listenip=0.0.0.0'
+      - '-allowfrom=homepage'
+      - '-allowGET=(/v[0-9.]+)?/containers/json'
+      - '-allowPOST=(/v[0-9.]+)?/containers/(genealogy-grampsweb(_celery|_redis)?-1|palworld)/(start|stop)'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - docker-proxy
+    restart: unless-stopped
+
+networks:
+  traefik-net:
+    external: true
+  monitoring:
+    name: grafana_monitoring
+    external: true
+  palworld:
+    name: palworld_default
+    external: true
+  # Only the homepage can reach the Docker proxy
+  docker-proxy:
+    internal: true

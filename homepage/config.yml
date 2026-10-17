@@ -1,0 +1,157 @@
+# Homepage (https://thomega.fr) configuration - restart the container after editing.
+#
+# Service status:
+#   - url: probed through Traefik; 2xx/3xx/401/403 = reachable (3xx covers the Authentik login redirect)
+#   - containers: Docker state/health; one stopped => degraded, all stopped => down
+#   - power: true adds a start/stop button (containers listed in start order, stopped in reverse);
+#     the containers must also be allowed in homepage-docker-proxy (docker-compose.yml)
+# icon: name from https://github.com/homarr-labs/dashboard-icons (svg), or a full URL
+
+server_name: thome-server
+
+# Authentik groups allowed to use the power buttons
+power_groups: [admin]
+
+# Mount points as reported by node-exporter
+storage:
+  - name: thome-server
+    mountpoint: /
+  - name: NAS
+    mountpoint: /mnt/nas
+
+minecraft:
+  name: Minecraft
+  icon: minecraft
+  host: minecraft # container name on traefik-net
+  port: 25565
+  container: minecraft
+  address: thomega.fr # what players type in the game
+  url: https://minecraft.thomega.fr # BlueMap
+  logs:
+    query: '{container="minecraft"} |~ "joined the game|left the game|Done \\(|Stopping the server"'
+    limit: 10
+
+palworld:
+  name: Palworld
+  icon: palworld
+  container: palworld
+  # Start/stop button (power_groups); stop is refused while players are online and saves the world first
+  power: true
+  address: thomega.fr:8211
+  hint: Stopped when idle - start it here or from the Discord panel
+  logs:
+    # Discord webhook messages sent by the server image + Start/Stop from the Discord bot
+    query: '{container=~"palworld|palworld-bot"} |~ "Sending Discord json|requested by|Nobody online"'
+    limit: 10
+
+groups:
+  - name: Apps
+    services:
+      - name: Immich
+        url: https://photo.thomega.fr
+        icon: immich
+        containers: [immich_server, immich_machine_learning, immich_postgres, immich_redis]
+      - name: Immich Kiosk
+        url: https://kiosk.thomega.fr
+        icon: immich
+        containers: [immich-kiosk]
+      - name: Nextcloud
+        url: https://nextcloud.thomega.fr
+        icon: nextcloud
+        containers: [nextcloud-nextcloud-1, nextcloud-postgres-1, nextcloud-redis-1]
+      - name: Home Assistant
+        url: https://home.thomega.fr
+        icon: home-assistant
+        containers: [homeassistant, homeassistant-mosquitto-1]
+      - name: Zigbee2MQTT
+        url: https://zigbee2mqtt.thomega.fr
+        icon: zigbee2mqtt
+        containers: [zigbee2mqtt]
+      - name: Dawarich
+        url: https://dawa.thomega.fr
+        icon: dawarich
+        containers: [dawarich_app, dawarich_sidekiq, dawarich_db, dawarich_redis]
+      - name: Gramps Web
+        url: https://gen.thomega.fr
+        icon: gramps-web
+        power: true
+        containers: [genealogy-grampsweb_redis-1, genealogy-grampsweb-1, genealogy-grampsweb_celery-1]
+      - name: Excalidash
+        url: https://excalidash.thomega.fr
+        icon: excalidraw
+        containers: [excalidash-frontend, excalidash-backend]
+      - name: Super Productivity
+        url: https://sp.thomega.fr
+        icon: super-productivity
+        containers: [super-productivity]
+      - name: BentoPDF
+        url: https://pdf.thomega.fr
+        icon: bentopdf
+        containers: [bentopdf]
+      - name: OpenSpeedTest
+        url: https://speed.thomega.fr
+        icon: openspeedtest
+        containers: [openspeedtest]
+      - name: BlueMap
+        url: https://minecraft.thomega.fr
+        icon: minecraft
+        containers: [minecraft]
+
+  - name: Admin
+    services:
+      - name: Authentik
+        url: https://auth.thomega.fr
+        icon: authentik
+        containers: [authentik_server, authentik_worker, authentik_postgres, authentik_redis]
+      - name: Traefik
+        url: https://traefik.thomega.fr
+        icon: traefik
+        containers: [traefik]
+      - name: Portainer
+        url: https://portainer.thomega.fr
+        icon: portainer
+        containers: [portainer]
+      - name: Grafana
+        url: https://grafana.thomega.fr
+        icon: grafana
+        containers: [grafana, loki, alloy]
+      - name: Prometheus
+        url: https://prometheus.thomega.fr
+        icon: prometheus
+        containers: [prometheus, node-exporter, grafana-cadvisor-1]
+      - name: Uptime Kuma
+        url: https://upk.thomega.fr
+        icon: uptime-kuma
+        containers: [uptime-kuma]
+      - name: What's Up Docker
+        url: https://wud.thomega.fr
+        icon: whats-up-docker
+        containers: [wud]
+      - name: Pi-hole
+        url: https://hole.thomega.fr/admin/
+        icon: pi-hole
+        containers: [pihole]
+      - name: MeshCentral
+        url: https://mesh.thomega.fr
+        icon: meshcentral
+        containers: [meshcentral]
+      - name: LAN Orangutan
+        url: https://lano.thomega.fr
+        icon: lan-orangutan
+        containers: [lan-orangutan]
+      - name: QDirStat
+        url: https://qdirstat.thomega.fr
+        icon: qdirstat
+        containers: [qdirstat]
+      - name: VS Code
+        url: https://vscode.thomega.fr
+        icon: vscode
+        containers: [vscode]
+      - name: RustDesk
+        description: hbbs + hbbr relay
+        icon: rustdesk
+        containers: [rustdesk-hbbs, rustdesk-hbbr]
+      - name: Restic
+        description: Backups to the NAS
+        icon: restic
+        containers: [restic]
