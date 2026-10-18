@@ -3,7 +3,7 @@
 ## Tailscale IPs
 
 - rpi: 100.81.37.26
-- thome-server: 100.104.147.17
+- thome-server: 100.104.147.1
 
 ## One-time install
 
@@ -42,8 +42,8 @@ Start or update:
 sudo docker-compose up -d
 ```
 
-Monitors (checks the server from outside its network; add the Discord webhook as notification):
+Monitors (group "Thome Server", checks the server from outside its network; Discord notification copied from the main instance):
 
-- thome-server ping: 100.104.147.17
+- thome-server ping: 100.104.147.1
 - https://thomega.fr, https://auth.thomega.fr, https://photo.thomega.fr, https://nextcloud.thomega.fr, https://fanfare-makabes.fr
-- Main Uptime Kuma: http://100.104.147.17:3001
+- Main Uptime Kuma: http://100.104.147.1:3001
