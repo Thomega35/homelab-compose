@@ -12,12 +12,25 @@ server_name: thome-server
 # Authentik groups allowed to use the power buttons
 power_groups: [admin]
 
-# Mount points as reported by node-exporter
+# Storage card: mount points as reported by node-exporter (job defaults to node-exporter = thome-server).
+# usage: optional breakdown of the used space, label -> PromQL query returning bytes (drawn as bar segments);
+#   the homelab_* metrics are written by restic/backup.sh (Immich every 2 h, repositories after each prune/push)
 storage:
   - name: thome-server
     mountpoint: /
   - name: NAS
     mountpoint: /mnt/nas
+    usage:
+      Immich: homelab_immich_originals_bytes
+      Backup: homelab_restic_repo_size_bytes{repo="nas"}
+  - name: Pi
+    job: rpi-node-exporter
+    mountpoint: /
+  - name: WDMyCloud Abbaye
+    job: rpi-node-exporter
+    mountpoint: /mnt/wdmycloud
+    usage:
+      Backup: homelab_restic_repo_size_bytes{repo="rpi"}
 
 minecraft:
   name: Minecraft

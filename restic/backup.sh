@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Dumps every running Postgres container to $DUMP_DIR,
 # then backs up $BACKUP_PATHS with restic (databases first, files after, as recommended by Immich).
+# Also writes the Immich and repository sizes to $METRICS_DIR (node-exporter textfile collector, shown on the homepage).
 # Options: --ha   also create a Home Assistant backup first (once a day)
 #          --push also copy the snapshots to the Pi NAS ($RPI_REPOSITORY)
 # Runs inside the restic container (see docker-compose.yml), scheduled by crond.
@@ -11,6 +12,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 set -a; source "$SCRIPT_DIR/.env"; set +a
 
 DUMP_DIR="${DUMP_DIR:-/data/backups/postgres}"
+METRICS_DIR="${METRICS_DIR:-/data/grafana/textfile}"
+IMMICH_DB_CONTAINER="${IMMICH_DB_CONTAINER:-immich_postgres}"
 ha=0 push=0
 for arg in "$@"; do
   case "$arg" in
@@ -27,6 +30,26 @@ exec 9>/tmp/homelab-backup.lock
 flock -n 9 || { echo "Another backup is already running"; exit 1; }
 
 log() { echo "[$(date '+%F %T')] $*"; }
+
+# Atomically writes stdin to $METRICS_DIR/$1.prom; failures only warn (metrics are not backups)
+metrics() {
+  local f="$METRICS_DIR/$1.prom"
+  if ! { cat > "$f.tmp" && chmod 644 "$f.tmp" && mv "$f.tmp" "$f"; }; then
+    log "WARNING: could not write $f"
+    rm -f "$f.tmp"
+  fi
+}
+
+# $1: repo label, then the restic command for that repository
+repo_metrics() {
+  local label=$1 size
+  shift
+  if size=$("$@" stats --mode raw-data --json | grep -o '"total_size":[0-9]*' | cut -d: -f2) && [[ -n "$size" ]]; then
+    printf 'homelab_restic_repo_size_bytes{repo="%s"} %s\n' "$label" "$size" | metrics "restic-$label"
+  else
+    log "WARNING: could not get the size of the $label repository"
+  fi
+}
 
 mkdir -p "$DUMP_DIR"
 failed=0
@@ -55,6 +78,14 @@ for c in $(docker ps --format '{{.Names}} {{.Image}}' | awk '$2 ~ /postgres|post
   fi
 done
 
+# Size of the Immich originals from its database (scanning the NAS share takes far too long); thumbnails and encoded videos not included
+if immich=$(docker exec "$IMMICH_DB_CONTAINER" sh -c 'psql -U "$POSTGRES_USER" -d "${POSTGRES_DB:-immich}" -Atc "SELECT COALESCE(sum(\"fileSizeInByte\"), 0) FROM asset_exif"' 2>&1) \
+    && [[ "$immich" =~ ^[0-9]+$ ]]; then
+  printf 'homelab_immich_originals_bytes %s\n' "$immich" | metrics immich
+else
+  log "WARNING: could not get the Immich size: $immich"
+fi
+
 read -ra paths <<< "$BACKUP_PATHS"
 
 log "restic backup ${paths[*]}"
@@ -62,6 +93,7 @@ restic backup --tag homelab --exclude-file "$SCRIPT_DIR/excludes.txt" "${paths[@
 
 log "restic forget/prune"
 restic forget --tag homelab "${keep[@]}" --prune
+repo_metrics nas restic
 
 # Second copy on the WD My Cloud behind the Pi, over SFTP via Tailscale (same password, same retention).
 # The SSH key is passphrase-protected: load it into a temporary ssh-agent.
@@ -78,6 +110,8 @@ if [[ "$push" == 1 && -n "${RPI_REPOSITORY:-}" ]]; then
       && "${rpi[@]}" forget --tag homelab "${keep[@]}" --prune; }; then
     log "ERROR: copy to Pi NAS failed"
     failed=1
+  else
+    repo_metrics rpi "${rpi[@]}"
   fi
   rm -f "$askpass"
 fi

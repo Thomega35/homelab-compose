@@ -59,6 +59,17 @@ Start or update:
 sudo docker-compose up -d
 ```
 
+## Node Exporter (Tailscale only)
+
+- Metrics: http://<RPI_TAILSCALE_IP>:9100/metrics, scraped by Prometheus on thome-server (job `rpi-node-exporter`)
+- Used by the homepage Storage card: Pi SD card (`/`) and WD My Cloud (`/mnt/wdmycloud`)
+
+Start or update:
+
+```bash
+sudo docker-compose up -d
+```
+
 ## Uptime Kuma (external watchdog, Tailscale only)
 
 - URL: http://<RPI_TAILSCALE_IP>:3001

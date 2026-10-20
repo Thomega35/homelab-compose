@@ -69,6 +69,14 @@ main {
 .bar.warn > div { background: var(--warn); }
 .bar.crit > div { background: var(--crit); }
 .bar > div.extra { background: var(--accent); opacity: .35; }
+/* Storage breakdown (Immich, Backup...): bar segments + legend swatches */
+.c0 { --part: #b48cff; }
+.c1 { --part: var(--accent); }
+.c2 { --part: #f08cc0; }
+.c3 { --part: #5fd4d4; }
+.bar > div.part { background: var(--part); }
+.legend { display: flex; flex-wrap: wrap; gap: .1rem .8rem; }
+.swatch { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: .35rem; background: var(--part); }
 
 /* Pills & dots */
 .pill {

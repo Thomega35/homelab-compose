@@ -142,6 +142,37 @@ async def prom(session, query):
     return (await get_json(session, f"{PROMETHEUS}/api/v1/query", params={"query": query}))["data"]["result"]
 
 
+async def prom_sum(session, query):
+    result = await prom(session, query)
+    return sum(float(m["value"][1]) for m in result) if result else None
+
+
+async def storage(session):
+    """Disks from config.yml (any node-exporter job), with the optional `usage` breakdown queries."""
+    disks = CONFIG.get("storage", [])
+    queries = sorted({q for d in disks for q in (d.get("usage") or {}).values()})
+    size, avail, *values = await asyncio.gather(
+        prom(session, 'node_filesystem_size_bytes{fstype!="autofs"}'),
+        prom(session, 'node_filesystem_avail_bytes{fstype!="autofs"}'),
+        *(safe(f"storage {q}", prom_sum(session, q)) for q in queries),
+    )
+    size = {(m["metric"]["job"], m["metric"]["mountpoint"]): float(m["value"][1]) for m in size}
+    avail = {(m["metric"]["job"], m["metric"]["mountpoint"]): float(m["value"][1]) for m in avail}
+    values = dict(zip(queries, values))
+    result = []
+    for disk in disks:
+        key = (disk.get("job", "node-exporter"), disk["mountpoint"])
+        found = key in size and key in avail
+        result.append({
+            "name": disk["name"],
+            "mountpoint": disk["mountpoint"],
+            "size": size[key] if found else None,
+            "used": size[key] - avail[key] if found else None,
+            "usage": [{"name": name, "bytes": values[q]} for name, q in (disk.get("usage") or {}).items()],
+        })
+    return result
+
+
 async def system(session):
     queries = {
         "cpu": f'100 * (1 - avg(rate(node_cpu_seconds_total{{{NODE},mode="idle"}}[2m])))',
@@ -157,20 +188,13 @@ async def system(session):
         # % of time at least one task waited for memory (PSI "some")
         "mem_pressure": f"100 * rate(node_pressure_memory_waiting_seconds_total{{{NODE}}}[5m])",
         "uptime": f"time() - node_boot_time_seconds{{{NODE}}}",
-        "fs_size": f"node_filesystem_size_bytes{{{NODE}}}",
-        "fs_avail": f"node_filesystem_avail_bytes{{{NODE}}}",
     }
-    r = dict(zip(queries, await asyncio.gather(*(prom(session, q) for q in queries.values()))))
-    size = {m["metric"]["mountpoint"]: float(m["value"][1]) for m in r.pop("fs_size")}
-    avail = {m["metric"]["mountpoint"]: float(m["value"][1]) for m in r.pop("fs_avail")}
+    host, disks = await asyncio.gather(
+        asyncio.gather(*(prom(session, q) for q in queries.values())),
+        safe("storage", storage(session)),
+    )
+    r = dict(zip(queries, host))
     v = {k: float(x[0]["value"][1]) if x else None for k, x in r.items()}
-    storage = []
-    for disk in CONFIG.get("storage", []):
-        mp = disk["mountpoint"]
-        if mp in size:
-            storage.append({**disk, "size": size[mp], "used": size[mp] - avail[mp]})
-        else:
-            storage.append({**disk, "size": None, "used": None})
     # Used = not reclaimable (MemTotal - MemAvailable); cache = reclaimable part of buffers/page cache
     mem_used = v["mem_total"] - v["mem_avail"] if v["mem_total"] is not None else None
     mem_cache = v["mem_avail"] - v["mem_free"] if v["mem_avail"] is not None else None
@@ -188,7 +212,7 @@ async def system(session):
         "swap_total": v["swap_total"],
         "swap_in": v["swap_in"],
         "uptime": v["uptime"],
-        "storage": storage,
+        "storage": disks or [],
     }
 
 
@@ -445,6 +469,8 @@ async def api_power(request):
 async def security_headers(request, handler):
     response = await handler(request)
     response.headers.update(HEADERS)
+    # Revalidate the page and its assets (cheap 304 via ETag) so a redeploy shows up without a hard refresh
+    response.headers.setdefault("Cache-Control", "no-cache")
     return response
 
 

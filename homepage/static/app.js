@@ -57,6 +57,18 @@ function bar(percent, extra) {
     e > 0 && h("div", { class: "extra", style: { width: `${e}%` } }));
 }
 
+// Used space split into known parts (`parts`: pct + color index), the rest in the usual ok/warn/crit color
+function stackedBar(percent, parts) {
+  const p = Math.max(0, Math.min(100, percent ?? 0));
+  let rest = p;
+  const segments = parts.map((x) => {
+    const w = Math.max(0, Math.min(rest, x.pct ?? 0));
+    rest -= w;
+    return w > 0 && h("div", { class: `part c${x.color}`, style: { width: `${w}%` } });
+  });
+  return h("div", { class: `bar ${level(p)}` }, segments, h("div", { style: { width: `${rest}%` } }));
+}
+
 function icon(name, label) {
   const fallback = h("span", { class: "icon letter" }, (label || "?")[0]);
   if (!name) return fallback;
@@ -97,14 +109,24 @@ function renderHost(sys) {
 
 function renderStorage(sys) {
   const disks = sys?.storage ?? [];
+  // Same color for a label on every disk (e.g. Backup on both NAS)
+  const colors = new Map();
+  for (const d of disks) for (const u of d.usage ?? []) if (!colors.has(u.name)) colors.set(u.name, colors.size % 4);
   fill($("storage"),
     h("h2", {}, "Storage"),
     h("div", { class: "metrics" },
       disks.map((d) => {
         if (d.size == null) return metric(d.name, "unavailable", `${d.mountpoint} not mounted`);
         const pct = (100 * d.used) / d.size;
-        return metric(d.name, `${pct.toFixed(0)} %`,
-          `${bytes(d.used)} / ${bytes(d.size)} - ${bytes(d.size - d.used)} free`, pct);
+        const parts = (d.usage ?? []).map((u) => ({ ...u, pct: u.bytes != null ? (100 * u.bytes) / d.size : null, color: colors.get(u.name) }));
+        return h("div", { class: "metric" },
+          h("div", { class: "metric-head" }, h("span", { class: "muted" }, d.name), h("strong", {}, `${pct.toFixed(0)} %`)),
+          stackedBar(pct, parts),
+          h("div", { class: "muted small" }, `${bytes(d.used)} / ${bytes(d.size)} - ${bytes(d.size - d.used)} free`),
+          parts.length > 0 && h("div", { class: "legend muted small" },
+            parts.map((p) => h("span", {},
+              h("i", { class: `swatch c${p.color}` }),
+              p.bytes != null ? `${p.name} ${bytes(p.bytes)} (${p.pct.toFixed(0)} %)` : `${p.name} ?`))));
       })));
 }
 
