@@ -2,10 +2,41 @@ services:
   homeassistant:
     container_name: homeassistant
     hostname: homeassistant
-    image: ghcr.io/home-assistant/home-assistant:2026.5
+    image: ghcr.io/home-assistant/home-assistant:2026.10
     volumes:
       - /data/homeassistant/config:/config
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - "100.81.37.26:8123:8123"
+      - "${TAILSCALE_IP}:8123:8123"
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+
+  mosquitto:
+    container_name: mosquitto
+    image: eclipse-mosquitto:2.1.2-alpine
+    volumes:
+      - /data/mosquitto/config:/mosquitto/config
+      - /data/mosquitto/data:/mosquitto/data
+    ports:
+      - "${TAILSCALE_IP}:1883:1883"
+    restart: unless-stopped
+
+  zigbee2mqtt:
+    container_name: zigbee2mqtt
+    image: ghcr.io/koenkk/zigbee2mqtt:2.14.2
+    volumes:
+      - /data/zigbee2mqtt:/app/data
+      - /run/udev:/run/udev:ro
+    environment:
+      - TZ=Europe/Paris
+      - ZIGBEE2MQTT_CONFIG_MQTT_SERVER=mqtt://mosquitto:1883
+      - ZIGBEE2MQTT_CONFIG_SERIAL_PORT=/dev/ttyUSB0
+      - ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER=ember
+    devices:
+      - /dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_b6742dfdc8c2ef11bb494eac8048b910-if00-port0:/dev/ttyUSB0
+    ports:
+      - "${TAILSCALE_IP}:8080:8080"
+    depends_on:
+      - mosquitto
     restart: unless-stopped

@@ -3,7 +3,7 @@ default_config:
 
 homeassistant:
   external_url: "https://home.thomega.fr"
-  internal_url: "http://192.168.1.5:8123"
+  internal_url: !env_var HA_INTERNAL_URL
 
 # Load frontend themes from the themes folder
 frontend:
@@ -20,7 +20,7 @@ http:
 
 remote_homeassistant:
   instances:
-  - host: 100.81.37.26
+  - host: !env_var RPI_TAILSCALE_IP
     port: 8123
     secure: false
     access_token: !env_var REMOTE_HA_TOKEN

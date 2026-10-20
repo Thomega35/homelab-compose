@@ -5,5 +5,5 @@ services:
     volumes:
       - /data/uptime-kuma:/app/data
     ports:
-      - "100.81.37.26:3001:3001"
+      - "${TAILSCALE_IP}:3001:3001"
     restart: unless-stopped

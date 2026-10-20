@@ -69,4 +69,4 @@ docker compose logs -f
 
 - `traefik/` creates the shared Docker network `traefik-net`; start this stack before other services that attach to it.
 - `homepage/` also joins `grafana_monitoring` (Loki) and `palworld_default` (Palworld REST API): start `grafana/` and `palworld/` first. Services and game settings are in `homepage/config.yml`.
-- `pihole/` uses macvlan with static IP `192.168.1.6` and wildcard DNS for `*.thomega.fr` routed to `192.168.1.5`.
+- `pihole/` uses macvlan with a static IP (`PIHOLE_IP`) and wildcard DNS for `*.thomega.fr` routed to the server (`SERVER_IP`); set them in `pihole/.env`.

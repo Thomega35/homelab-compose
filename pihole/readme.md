@@ -11,13 +11,13 @@ network:
     enp34s0:  # Your interface name
       dhcp4: false
       addresses:
-        - 192.168.1.5/24
+        - <SERVER_IP>/24
       routes:
         - to: default
-          via: 192.168.1.1
+          via: <LAN_GATEWAY>
       nameservers:
         addresses:
-          - 192.168.1.6
+          - <PIHOLE_IP>
       optional: true
 ```
 
@@ -32,7 +32,7 @@ ip addr show enp34s0
 ip route
 cat /etc/resolv.conf
 
-ping 192.168.1.1
+ping <LAN_GATEWAY>
 ping 1.1.1.1
 ping google.com
 
