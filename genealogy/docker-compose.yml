@@ -8,6 +8,18 @@ services:
       GRAMPSWEB_CELERY_CONFIG__broker_url: "redis://grampsweb_redis:6379/0"
       GRAMPSWEB_CELERY_CONFIG__result_backend: "redis://grampsweb_redis:6379/0"
       GRAMPSWEB_RATELIMIT_STORAGE_URI: redis://grampsweb_redis:6379/1
+      GRAMPSWEB_BASE_URL: https://gen.thomega.fr
+      # Authentik OIDC (application "Gramps Web", redirect URI https://gen.thomega.fr/api/oidc/callback/custom)
+      GRAMPSWEB_OIDC_ENABLED: "true"
+      GRAMPSWEB_OIDC_NAME: Authentik
+      GRAMPSWEB_OIDC_ISSUER: https://auth.thomega.fr/application/o/gramps-web/
+      GRAMPSWEB_OIDC_CLIENT_ID: ${GRAMPSWEB_OIDC_CLIENT_ID}
+      GRAMPSWEB_OIDC_CLIENT_SECRET: ${GRAMPSWEB_OIDC_CLIENT_SECRET}
+      # "gramps" scope = Authentik "Gramps Web role" mapping: thomega/fgdou -> admin, everyone else -> member
+      GRAMPSWEB_OIDC_SCOPES: openid email profile gramps
+      GRAMPSWEB_OIDC_ROLE_CLAIM: gramps_role
+      GRAMPSWEB_OIDC_GROUP_ADMIN: admin
+      GRAMPSWEB_OIDC_GROUP_MEMBER: member
     depends_on:
       - grampsweb_redis
     volumes:
@@ -29,6 +41,32 @@ services:
       - 'traefik.http.routers.grampsweb.entryPoints=websecure'
       - 'traefik.http.routers.grampsweb.tls=true'
       - 'traefik.http.services.grampsweb.loadbalancer.server.port=5000'
+      # Multi-tree OIDC login needs a tree ID, which the Gramps frontend never sends:
+      # trees: 2c5e0aaa-... = Arbre Thomas Delapart, 3ba49364-... = Arbre Fabien Dufour
+      # - /sso/<username> (Authentik tile launch URL https://gen.thomega.fr/sso/%(username)s): fgdou -> his tree, others -> Thomas' tree
+      - 'traefik.http.routers.grampsweb-sso.rule=Host(`gen.thomega.fr`) && PathPrefix(`/sso/`)'
+      - 'traefik.http.routers.grampsweb-sso.entryPoints=websecure'
+      - 'traefik.http.routers.grampsweb-sso.tls=true'
+      - 'traefik.http.routers.grampsweb-sso.service=grampsweb'
+      - 'traefik.http.routers.grampsweb-sso.middlewares=grampsweb-sso-thomas'
+      - 'traefik.http.middlewares.grampsweb-sso-thomas.redirectregex.regex=^https?://([^/]+)/sso/.*'
+      - 'traefik.http.middlewares.grampsweb-sso-thomas.redirectregex.replacement=https://$${1}/api/oidc/login/?provider=custom&tree=2c5e0aaa-5ed2-403a-9ca1-97ca4e64d26d'
+      - 'traefik.http.routers.grampsweb-sso-fabien.rule=Host(`gen.thomega.fr`) && PathRegexp(`^/sso/fgdou/?$$`)'
+      - 'traefik.http.routers.grampsweb-sso-fabien.entryPoints=websecure'
+      - 'traefik.http.routers.grampsweb-sso-fabien.tls=true'
+      - 'traefik.http.routers.grampsweb-sso-fabien.service=grampsweb'
+      - 'traefik.http.routers.grampsweb-sso-fabien.priority=1000'
+      - 'traefik.http.routers.grampsweb-sso-fabien.middlewares=grampsweb-sso-fabien'
+      - 'traefik.http.middlewares.grampsweb-sso-fabien.redirectregex.regex=^https?://([^/]+)/sso/.*'
+      - 'traefik.http.middlewares.grampsweb-sso-fabien.redirectregex.replacement=https://$${1}/api/oidc/login/?provider=custom&tree=3ba49364-a827-46e6-9c8e-d27a0a4b74c4'
+      # - "Authentik" button on the Gramps login page (no tree): default to Thomas' tree
+      - 'traefik.http.routers.grampsweb-oidc-default.rule=Host(`gen.thomega.fr`) && Path(`/api/oidc/login/`) && !QueryRegexp(`tree`, `.*`)'
+      - 'traefik.http.routers.grampsweb-oidc-default.entryPoints=websecure'
+      - 'traefik.http.routers.grampsweb-oidc-default.tls=true'
+      - 'traefik.http.routers.grampsweb-oidc-default.service=grampsweb'
+      - 'traefik.http.routers.grampsweb-oidc-default.middlewares=grampsweb-oidc-default-tree'
+      - 'traefik.http.middlewares.grampsweb-oidc-default-tree.redirectregex.regex=^https?://([^/]+)/api/oidc/login/\?(.*)$$'
+      - 'traefik.http.middlewares.grampsweb-oidc-default-tree.redirectregex.replacement=https://$${1}/api/oidc/login/?$${2}&tree=2c5e0aaa-5ed2-403a-9ca1-97ca4e64d26d'
 
   grampsweb_celery:
     <<: *grampsweb
