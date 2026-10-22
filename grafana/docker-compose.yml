@@ -1,6 +1,6 @@
 services:
   grafana:
-    image: grafana/grafana:13.1.0
+    image: grafana/grafana:13.2.4
     container_name: grafana
     ports:
       - "3000:3000"
@@ -46,7 +46,7 @@ services:
 
   # Prometheus - Metriques
   prometheus:
-    image: prom/prometheus:v3.15.0
+    image: prom/prometheus:v3.15.1
     container_name: prometheus
     ports:
       - "9090:9090"
@@ -131,7 +131,7 @@ services:
 
   # Grafana Alloy - Collecteur moderne
   alloy:
-    image: grafana/alloy:v1.20.1
+    image: grafana/alloy:v1.21.1
     container_name: alloy
     labels:
       - 'wud.tag.include=^v\d+\.\d+\.\d+$$'
