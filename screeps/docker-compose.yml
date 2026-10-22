@@ -1,0 +1,26 @@
+services:
+  screeps:
+    image: ${SCREEPS_IMAGE:?Set SCREEPS_IMAGE in screeps/.env to the actual GHCR package name}
+    container_name: screeps
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      TZ: ${TZ:-Europe/Paris}
+      WEBHOOK_URL: ${WEBHOOK_URL:-}
+      SCREEPS_TOKEN: ${SCREEPS_TOKEN:-}
+    networks:
+      - traefik-net
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=${TRAEFIK_NETWORK_NAME:-traefik-net}'
+      - 'traefik.http.routers.screeps.rule=Host(`${SCREEPS_HOST:-screeps.thomega.fr}`)'
+      - 'traefik.http.routers.screeps.entryPoints=${TRAEFIK_ENTRYPOINT:-websecure}'
+      - 'traefik.http.routers.screeps.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.screeps.loadbalancer.server.port=${SCREEPS_PORT:-3000}'
+      - 'traefik.http.routers.screeps.middlewares=authentik-auth@docker'
+
+networks:
+  traefik-net:
+    external: true
+    name: ${TRAEFIK_NETWORK_NAME:-traefik-net}

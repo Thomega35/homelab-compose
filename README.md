@@ -18,6 +18,7 @@ Simple Docker Compose files for my homelab services.
 - `portainer/`: Portainer CE container management UI
 - `qdirstat/`: QDirStat disk usage analyzer (host `/` mounted read-only) behind Traefik + Authentik
 - `rustdesk/`: RustDesk self-hosted server (hbbs + hbbr)
+- `screeps/`: Screeps relay UI behind Traefik + Authentik
 - `super-productivity/`: Super Productivity + WebDAV sync behind Traefik
 - `traefik/`: Reverse proxy + TLS (Let's Encrypt DNS challenge with Cloudflare) + Cloudflare DDNS
 - `uptime-kuma/`: Uptime Kuma monitoring dashboard
@@ -47,6 +48,7 @@ graph LR
         Zigbee2mqtt[Zigbee2MQTT]
         Qdirstat[QDirStat]
         Vscode[code-server]
+        Screeps[Screeps]
         SuperProd[Super Productivity]
         UptimeKuma[Uptime Kuma]
         WUD
@@ -149,7 +151,7 @@ Every web app goes through Traefik. Authentik (`auth.thomega.fr`) protects them 
 
 | Mode | Apps |
 | --- | --- |
-| **Forward-auth** (Traefik `authentik-auth@docker` middleware + Authentik proxy provider, login before the app loads) | Homepage, Traefik dashboard, Prometheus, Immich Kiosk, Zigbee2MQTT, BentoPDF, Super Productivity, Uptime Kuma, What's Up Docker, Pi-hole (`/admin/img` + `/api` bypass), LAN Orangutan, QDirStat, VS Code |
+| **Forward-auth** (Traefik `authentik-auth@docker` middleware + Authentik proxy provider, login before the app loads) | Homepage, Traefik dashboard, Prometheus, Immich Kiosk, Zigbee2MQTT, BentoPDF, Screeps, Super Productivity, Uptime Kuma, What's Up Docker, Pi-hole (`/admin/img` + `/api` bypass), LAN Orangutan, QDirStat, VS Code |
 | **OAuth2 / OIDC** (Authentik OAuth2 provider, "Login with Authentik" in the app) | Grafana, Immich, Nextcloud, Home Assistant, Portainer, Dawarich, Excalidash, MeshCentral, Gramps Web |
 | **None** (public) | OpenSpeedTest, BlueMap (Minecraft map) |
 
@@ -202,6 +204,7 @@ docker compose logs -f
 - Portainer: `https://portainer.thomega.fr`
 - QDirStat: `https://qdirstat.thomega.fr`
 - RustDesk server: `https://rust.thomega.fr`
+- Screeps: `https://screeps.thomega.fr`
 - Super Productivity: `https://sp.thomega.fr`
 - Traefik dashboard: `https://traefik.thomega.fr`
 - Authentik: `https://auth.thomega.fr`

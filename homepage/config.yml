@@ -93,6 +93,10 @@ groups:
         url: https://excalidash.thomega.fr
         icon: excalidraw
         containers: [excalidash-frontend, excalidash-backend]
+      - name: Screeps
+        url: https://screeps.thomega.fr
+        icon: screeps
+        containers: [screeps]
       - name: Super Productivity
         url: https://sp.thomega.fr
         icon: super-productivity
