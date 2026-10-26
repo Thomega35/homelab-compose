@@ -28,6 +28,7 @@ services:
       OIDC_END_SESSION_ENDPOINT: "true"
     volumes:
       - /data/many-notes/bookstack/config:/config
+      - ./php-memory.ini:/config/php/99-memory-limit.ini:ro
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1/login"]
       interval: 30s
