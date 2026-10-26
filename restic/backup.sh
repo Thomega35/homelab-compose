@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Dumps every running Postgres container to $DUMP_DIR,
 # then backs up $BACKUP_PATHS with restic (databases first, files after, as recommended by Immich).
-# Also writes the Immich and repository sizes to $METRICS_DIR (node-exporter textfile collector, shown on the homepage).
+# Also writes the Immich and repository sizes to $METRICS_DIR (node-exporter textfile collector, shown on the homepage)
+# and the snapshot lists to $SNAPSHOTS_DIR (shown on the homepage).
 # Options: --ha   also create a Home Assistant backup first (once a day)
 #          --push also copy the snapshots to the Pi NAS ($RPI_REPOSITORY)
 # Runs inside the restic container (see docker-compose.yml), scheduled by crond.
@@ -13,6 +14,7 @@ set -a; source "$SCRIPT_DIR/.env"; set +a
 
 DUMP_DIR="${DUMP_DIR:-/data/backups/postgres}"
 METRICS_DIR="${METRICS_DIR:-/data/grafana/textfile}"
+SNAPSHOTS_DIR="${SNAPSHOTS_DIR:-/data/backups/snapshots}"
 IMMICH_DB_CONTAINER="${IMMICH_DB_CONTAINER:-immich_postgres}"
 ha=0 push=0
 for arg in "$@"; do
@@ -23,8 +25,10 @@ for arg in "$@"; do
   esac
 done
 
-# Backups run every 2 hours: keep them for 24 hours, then one per day/week/month.
-keep=(--keep-hourly 24 --keep-daily 7 --keep-weekly 4 --keep-monthly 12)
+# Backups run every 2 hours: keep them all for 24 hours (counted from the latest snapshot),
+# then one per day/week/month. Grouped by host+tags (not paths) so changing BACKUP_PATHS doesn't
+# leave the old snapshots in a separate group that is never pruned.
+keep=(--group-by host,tags --keep-within-hourly 24h --keep-daily 7 --keep-weekly 4 --keep-monthly 12)
 
 exec 9>/tmp/homelab-backup.lock
 flock -n 9 || { echo "Another backup is already running"; exit 1; }
@@ -51,7 +55,19 @@ repo_metrics() {
   fi
 }
 
-mkdir -p "$DUMP_DIR"
+# Snapshot list as JSON (only reads the snapshot files, cheap); $1: repo label, then the restic command for that repository
+snapshots_json() {
+  local label=$1 f="$SNAPSHOTS_DIR/$1.json"
+  shift
+  if ! { "$@" snapshots --tag homelab --json > "$f.tmp" && chmod 644 "$f.tmp" && mv "$f.tmp" "$f"; }; then
+    log "WARNING: could not write $f"
+    rm -f "$f.tmp"
+  fi
+}
+
+mkdir -p "$DUMP_DIR" "$SNAPSHOTS_DIR"
+# Readable by the homepage (runs as nobody)
+chmod 755 "$SNAPSHOTS_DIR"
 failed=0
 
 # Uses the automatic backup settings (agents, encryption, retention) from Settings > System > Backups.
@@ -94,6 +110,7 @@ restic backup --tag homelab --exclude-file "$SCRIPT_DIR/excludes.txt" "${paths[@
 log "restic forget/prune"
 restic forget --tag homelab "${keep[@]}" --prune
 repo_metrics nas restic
+snapshots_json nas restic
 
 # Second copy on the WD My Cloud behind the Pi, over SFTP via Tailscale (same password, same retention).
 # The SSH key is passphrase-protected: load it into a temporary ssh-agent.
@@ -112,6 +129,7 @@ if [[ "$push" == 1 && -n "${RPI_REPOSITORY:-}" ]]; then
     failed=1
   else
     repo_metrics rpi "${rpi[@]}"
+    snapshots_json rpi "${rpi[@]}"
   fi
   rm -f "$askpass"
 fi
