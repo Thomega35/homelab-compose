@@ -12,6 +12,7 @@ Simple Docker Compose files for my homelab services.
 - `immich-app/`: Immich stack (server, ML, Redis, Postgres)
 - `lan-orangutan/`: LAN Orangutan network device scanner (host network)
 - `meshcentral/`: MeshCentral remote device management
+- `book-stack/`: BookStack OSCP documentation with native Authentik OIDC and MariaDB
 - `nextcloud/`: Nextcloud AIO master container
 - `openspeedtest/`: OpenSpeedTest self-hosted speed test server
 - `pihole/`: Pi-hole DNS + DHCP (macvlan)
@@ -67,6 +68,7 @@ graph LR
         Excalidash
         Meshcentral[MeshCentral]
         Genealogy[Gramps Web]
+        BookStack[BookStack OSCP docs]
     end
 
     subgraph Public["Traefik only (no Authentik)"]
@@ -152,21 +154,15 @@ Every web app goes through Traefik. Authentik (`auth.thomega.fr`) protects them 
 | Mode | Apps |
 | --- | --- |
 | **Forward-auth** (Traefik `authentik-auth@docker` middleware + Authentik proxy provider, login before the app loads) | Homepage, Traefik dashboard, Prometheus, Immich Kiosk, Zigbee2MQTT, BentoPDF, Screeps, Super Productivity, Uptime Kuma, What's Up Docker, Pi-hole (`/admin/img` + `/api` bypass), LAN Orangutan, QDirStat, VS Code |
-| **OAuth2 / OIDC** (Authentik OAuth2 provider, "Login with Authentik" in the app) | Grafana, Immich, Nextcloud, Home Assistant, Portainer, Dawarich, Excalidash, MeshCentral, Gramps Web |
+| **OAuth2 / OIDC** (Authentik OAuth2 provider, "Login with Authentik" in the app) | Grafana, Immich, Nextcloud, Home Assistant, Portainer, Dawarich, Excalidash, MeshCentral, Gramps Web, BookStack |
 | **None** (public) | OpenSpeedTest, BlueMap (Minecraft map) |
 
 Not web apps: RustDesk, Minecraft, Palworld, Restic. The Pi services (`rpi/`) are LAN-only.
 
-Most OIDC clients are configured in each app's UI (Immich, Nextcloud, Home Assistant, Portainer). Grafana, Dawarich, Excalidash, Gramps Web (`.env`) and MeshCentral (`config.json`) are configured here.
+Most OIDC clients are configured in each app's UI (Immich, Nextcloud, Home Assistant, Portainer). The `.env`-based clients are Grafana, Dawarich, Excalidash, BookStack, and Gramps Web; MeshCentral uses `config.json`.
 
-### Gramps Web trees
 
-Gramps Web runs multi-tree (`GRAMPSWEB_TREE: "*"`). An OIDC account belongs to one tree, and the tree must be chosen *before* the redirect to Authentik, which the Gramps frontend never does. Traefik handles that:
 
-- Authentik app **Gramps Web** has the launch URL `https://gen.thomega.fr/sso/%(username)s`. Traefik redirects `fgdou` to *Arbre Fabien Dufour* and everyone else to *Arbre Thomas Delapart*.
-- The "Authentik" button on the Gramps login page (no tree) defaults to *Arbre Thomas Delapart*. Fabien has to use the Authentik tile or `https://gen.thomega.fr/sso/fgdou`.
-- Roles come from the Authentik scope mapping **Gramps Web role** (`gramps` scope, `gramps_role` claim): `thomega`/`fgdou` get `admin`, everyone else `member`. Gramps re-applies the role at every login.
-- The existing local accounts `Thomega` and `Fgdou` are linked to their Authentik identities in the `oidc_accounts` table of `/data/genealogy/users/users.sqlite` (provider `custom`, `subject_id` = Authentik hashed user ID). Local password login still works as a fallback.
 
 ## Requirements
 
@@ -209,6 +205,7 @@ docker compose logs -f
 - Traefik dashboard: `https://traefik.thomega.fr`
 - Authentik: `https://auth.thomega.fr`
 - MeshCentral: `https://mesh.thomega.fr`
+- BookStack (OSCP): `https://oscp.thomega.fr`
 - Pi-hole: `https://hole.thomega.fr`
 - Uptime Kuma: `https://upk.thomega.fr`
 - VS Code: `https://vscode.thomega.fr`

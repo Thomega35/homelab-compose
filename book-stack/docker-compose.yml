@@ -1,0 +1,72 @@
+services:
+  bookstack:
+    image: lscr.io/linuxserver/bookstack:latest
+    container_name: oscp-bookstack
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/Paris
+      APP_URL: https://oscp.thomega.fr
+      APP_KEY: ${BOOKSTACK_APP_KEY:?Set BOOKSTACK_APP_KEY in book-stack/.env}
+      DB_HOST: database
+      DB_PORT: 3306
+      DB_USERNAME: bookstack
+      DB_PASSWORD: ${BOOKSTACK_DB_PASSWORD:?Set BOOKSTACK_DB_PASSWORD in book-stack/.env}
+      DB_DATABASE: bookstack
+      AUTH_METHOD: oidc
+      AUTH_AUTO_INITIATE: "false"
+      OIDC_NAME: Authentik
+      OIDC_DISPLAY_NAME_CLAIMS: name
+      OIDC_CLIENT_ID: ${BOOKSTACK_OIDC_CLIENT_ID:?Set BOOKSTACK_OIDC_CLIENT_ID in book-stack/.env}
+      OIDC_CLIENT_SECRET: ${BOOKSTACK_OIDC_CLIENT_SECRET:?Set BOOKSTACK_OIDC_CLIENT_SECRET in book-stack/.env}
+      OIDC_ISSUER: https://auth.thomega.fr/application/o/oscp-study-vault/
+      OIDC_ISSUER_DISCOVER: "true"
+      OIDC_END_SESSION_ENDPOINT: "true"
+    volumes:
+      - /data/many-notes/bookstack/config:/config
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - traefik-net
+      - bookstack-internal
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=traefik-net'
+      - 'traefik.http.routers.bookstack.rule=Host(`oscp.thomega.fr`)'
+      - 'traefik.http.routers.bookstack.entryPoints=websecure'
+      - 'traefik.http.routers.bookstack.tls=true'
+      - 'traefik.http.services.bookstack.loadbalancer.server.port=80'
+
+  database:
+    image: mariadb:11.4
+    container_name: oscp-bookstack-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${BOOKSTACK_DB_ROOT_PASSWORD:?Set BOOKSTACK_DB_ROOT_PASSWORD in book-stack/.env}
+      MARIADB_DATABASE: bookstack
+      MARIADB_USER: bookstack
+      MARIADB_PASSWORD: ${BOOKSTACK_DB_PASSWORD:?Set BOOKSTACK_DB_PASSWORD in book-stack/.env}
+    volumes:
+      - /data/many-notes/bookstack/database:/var/lib/mysql
+    networks:
+      - bookstack-internal
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+networks:
+  traefik-net:
+    external: true
+    name: traefik-net
+  bookstack-internal:
