@@ -37,7 +37,7 @@ LOG_PREFIX = re.compile(r"^(\[[^\]]*\]\s*)+:?\s*")
 # restic times have nanoseconds, fromisoformat only takes microseconds
 NANOSECONDS = re.compile(r"(\.\d{6})\d+")
 HEADERS = {
-    "Content-Security-Policy": "default-src 'self'; img-src 'self' https://cdn.jsdelivr.net; "
+    "Content-Security-Policy": "default-src 'self'; img-src 'self' https://cdn.jsdelivr.net https://fanfare-makabes.fr https://labo.thomega.fr https://cdn.xsolla.net; "
     "frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "same-origin",

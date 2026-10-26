@@ -172,7 +172,7 @@ groups:
         containers: [rustdesk-hbbs, rustdesk-hbbr]
       - name: Restic
         description: Backups to the NAS
-        icon: https://restic.net/favicon.ico
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/restic.png
         containers: [restic]
 
   - name: App Admin/Tech Bro
