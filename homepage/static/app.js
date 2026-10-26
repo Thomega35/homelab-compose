@@ -130,6 +130,30 @@ function renderStorage(sys) {
       })));
 }
 
+// --- Backups ------------------------------------------------------------------
+
+const dateTime = (ms) => new Date(ms).toLocaleString([], { weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+
+function renderBackups(repos) {
+  fill($("backups"),
+    h("h2", {}, "Backups"),
+    h("div", { class: "backups" }, repos.map((r) => {
+      const snaps = r.snapshots ?? [];
+      const latest = snaps[0];
+      const late = latest && r.max_age_hours != null && Date.now() - latest.time > r.max_age_hours * 3600e3;
+      return h("div", {},
+        h("div", { class: "metric-head" },
+          h("span", {}, h("strong", {}, r.name), h("span", { class: "muted small" }, ` ${snaps.length} snapshots`)),
+          latest
+            ? h("span", { class: `pill ${late ? "starting" : "online"}`, title: dateTime(latest.time) }, `Latest ${ago(latest.time)}`)
+            : h("span", { class: "pill offline" }, "No data")),
+        snaps.length > 0 && h("ul", { class: "logs snapshots" }, snaps.map((s) => h("li", {},
+          h("time", { title: new Date(s.time).toLocaleString() }, dateTime(s.time)),
+          h("code", { class: "muted" }, s.id),
+          h("span", {}, bytes(s.size))))));
+    })));
+}
+
 // --- Games --------------------------------------------------------------------
 
 const GAME_STATUS = { online: "Online", starting: "Starting", offline: "Offline" };
@@ -277,6 +301,7 @@ async function update() {
     }
     renderHost(s.system);
     renderStorage(s.system);
+    renderBackups(s.backups ?? []);
     renderGame("minecraft", s.games.minecraft, s.can_power);
     renderGame("palworld", s.games.palworld, s.can_power);
     renderServices(s.services, s.can_power);

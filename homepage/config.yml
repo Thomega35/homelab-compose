@@ -32,6 +32,16 @@ storage:
     usage:
       Backup: homelab_restic_repo_size_bytes{repo="rpi"}
 
+# Backups card: restic snapshot lists written by restic/backup.sh (nas.json after each backup, rpi.json after each push)
+# max_age_hours: the latest snapshot is shown as late after that
+backups:
+  - name: NAS
+    file: nas.json
+    max_age_hours: 3 # every 2 hours
+  - name: WDMyCloud Abbaye
+    file: rpi.json
+    max_age_hours: 100 # Monday and Thursday at 02:00
+
 minecraft:
   name: Minecraft
   icon: minecraft
@@ -89,6 +99,10 @@ groups:
         icon: gramps-web
         power: true
         containers: [genealogy-grampsweb_redis-1, genealogy-grampsweb-1, genealogy-grampsweb_celery-1]
+      - name: BookStack
+        url: https://oscp.thomega.fr
+        icon: bookstack
+        containers: [oscp-bookstack, oscp-bookstack-db]
       - name: Excalidash
         url: https://excalidash.thomega.fr
         icon: excalidraw

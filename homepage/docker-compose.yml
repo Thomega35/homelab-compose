@@ -8,6 +8,7 @@ services:
       TZ: Europe/Paris
     volumes:
       - ./config.yml:/app/config.yml:ro
+      - /data/backups/snapshots:/backups:ro # restic snapshot lists, written by restic/backup.sh
     labels:
       - 'wud.watch=false'
       - 'traefik.enable=true'

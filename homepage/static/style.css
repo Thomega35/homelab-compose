@@ -123,6 +123,12 @@ main {
 .logs .dot { transform: translateY(-1px); }
 .logs span:last-child { overflow-wrap: anywhere; }
 
+/* Backups */
+.backups { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.snapshots { margin-top: .4rem; font-variant-numeric: tabular-nums; }
+.snapshots time { flex-basis: 10rem; font-size: .86rem; color: var(--text); }
+.snapshots span:last-child { margin-left: auto; }
+
 /* Services */
 .group h2 { font-size: .85rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: .6rem 0 .7rem; }
 .tiles { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }

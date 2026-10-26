@@ -9,6 +9,7 @@ import re
 import socket
 import struct
 import time
+from datetime import datetime
 from pathlib import Path
 
 import aiohttp
@@ -25,6 +26,7 @@ LOKI = os.environ.get("LOKI_URL", "http://loki:3100")
 DOCKER = os.environ.get("DOCKER_URL", "http://homepage-docker-proxy:2375")
 PALWORLD_API = os.environ.get("PALWORLD_API", "http://palworld:8212/v1/api")
 PALWORLD_AUTH = {"Authorization": aiohttp.encode_basic_auth("admin", os.environ.get("PALWORLD_ADMIN_PASSWORD", ""))}
+BACKUPS_DIR = Path(os.environ.get("BACKUPS_DIR", "/backups"))
 REFRESH = int(os.environ.get("REFRESH_SECONDS") or 15)
 STATIC = Path(__file__).with_name("static")
 NODE = 'job="node-exporter"'
@@ -32,6 +34,8 @@ NODE = 'job="node-exporter"'
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 # "[18:02:44] [Server thread/INFO]: " / "[2026-10-17 18:02:44] [LOG] "
 LOG_PREFIX = re.compile(r"^(\[[^\]]*\]\s*)+:?\s*")
+# restic times have nanoseconds, fromisoformat only takes microseconds
+NANOSECONDS = re.compile(r"(\.\d{6})\d+")
 HEADERS = {
     "Content-Security-Policy": "default-src 'self'; img-src 'self' https://cdn.jsdelivr.net; "
     "frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
@@ -39,7 +43,7 @@ HEADERS = {
     "Referrer-Policy": "same-origin",
 }
 
-state = {"updated": None, "system": None, "games": {}, "services": []}
+state = {"updated": None, "system": None, "games": {}, "services": [], "backups": []}
 
 
 class TraefikResolver(AbstractResolver):
@@ -216,6 +220,36 @@ async def system(session):
     }
 
 
+# --- Backups (restic snapshot lists) -----------------------------------------
+
+def restic_time(s):
+    return int(datetime.fromisoformat(NANOSECONDS.sub(r"\1", s)).timestamp() * 1000)
+
+
+def backups():
+    result = []
+    for repo in CONFIG.get("backups", []):
+        entry = {"name": repo["name"], "max_age_hours": repo.get("max_age_hours"), "snapshots": None}
+        try:
+            snaps = json.loads((BACKUPS_DIR / repo["file"]).read_text())
+            entry["snapshots"] = sorted(
+                ({
+                    "id": s["short_id"],
+                    "time": restic_time(s["time"]),
+                    # Size of the backed up files (not the space used in the repository, deduplicated)
+                    "size": (s.get("summary") or {}).get("total_bytes_processed"),
+                } for s in snaps),
+                key=lambda s: s["time"],
+                reverse=True,
+            )
+        except FileNotFoundError:
+            pass
+        except (OSError, ValueError, KeyError, TypeError) as e:
+            print(f"backups {repo['file']}: {e!r}", flush=True)
+        result.append(entry)
+    return result
+
+
 # --- Logs (Loki) -------------------------------------------------------------
 
 def format_line(line):
@@ -357,6 +391,7 @@ async def refresh(session):
         services=svc or [],
         system=sys_,
         games={"minecraft": mc, "palworld": pal},
+        backups=backups(),
     )
 
 
