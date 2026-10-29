@@ -5,25 +5,33 @@ Simple Docker Compose files for my homelab services.
 ## Services
 
 - `authentik/`: Identity provider and forward-auth middleware for Traefik
+- `bentopdf/`: BentoPDF client-side PDF toolbox behind Traefik + Authentik
+- `dawarich/`: Dawarich location history (Postgres/PostGIS, Redis) with Authentik OIDC login
+- `excalidash/`: Excalidash Excalidraw dashboard (frontend + backend) with Authentik OIDC login
 - `genealogy/`: Gramps Web (multi-tree) with Authentik OIDC login
 - `grafana/`: Observability stack (Grafana, Prometheus, Loki, Alloy, Node Exporter)
-- `homeassistant/`: Home Assistant
+- `homeassistant/`: Home Assistant, Mosquitto and Zigbee2MQTT
 - `homepage/`: Custom homepage on `thomega.fr` (service status, server/NAS/Pi storage with Immich & backup share, Minecraft & Palworld overview) behind Authentik
-- `immich-app/`: Immich stack (server, ML, Redis, Postgres)
+- `immich-app/`: Immich stack (server, ML, Redis, Postgres) and Immich Kiosk
 - `lan-orangutan/`: LAN Orangutan network device scanner (host network)
 - `meshcentral/`: MeshCentral remote device management
+- `minecraft/`: Minecraft server with the BlueMap web map
 - `book-stack/`: BookStack OSCP documentation with native Authentik OIDC and MariaDB
-- `nextcloud/`: Nextcloud AIO master container
+- `nextcloud/`: Nextcloud with Postgres and Redis, data on the NAS
 - `openspeedtest/`: OpenSpeedTest self-hosted speed test server
-- `pihole/`: Pi-hole DNS + DHCP (macvlan)
+- `palworld/`: Palworld dedicated server with a Discord whitelist bot
+- `pihole/`: Pi-hole DNS (macvlan), not the LAN default: the ISP box does DHCP and DNS, currently under maintenance
 - `portainer/`: Portainer CE container management UI
 - `qdirstat/`: QDirStat disk usage analyzer (host `/` mounted read-only) behind Traefik + Authentik
+- `restic/`: Backups to the NAS every 2 h (Postgres dumps, `/data`, NAS shares) and copy to the Pi's WD My Cloud twice a week
+- `rpi/`: Raspberry Pi stacks (see [rpi/README.md](rpi/README.md))
 - `rustdesk/`: RustDesk self-hosted server (hbbs + hbbr)
 - `screeps/`: Screeps relay UI behind Traefik + Authentik
 - `super-productivity/`: Super Productivity + WebDAV sync behind Traefik
 - `traefik/`: Reverse proxy + TLS (Let's Encrypt DNS challenge with Cloudflare) + Cloudflare DDNS
 - `uptime-kuma/`: Uptime Kuma monitoring dashboard
 - `vscode/`: code-server exposed behind Traefik + Authentik
+- `wud/`: What's Up Docker image update checks behind Traefik + Authentik
 
 ## Dependency graph
 
@@ -189,13 +197,18 @@ docker compose logs -f
 ## URLs
 
 - Homepage: `https://thomega.fr`
+- BentoPDF: `https://pdf.thomega.fr`
+- BlueMap (Minecraft map): `https://minecraft.thomega.fr`
+- Dawarich: `https://dawa.thomega.fr`
+- Excalidash: `https://excalidash.thomega.fr`
 - Gramps Web: `https://gen.thomega.fr`
 - Grafana: `https://grafana.thomega.fr`
 - Prometheus: `https://prometheus.thomega.fr`
 - Home Assistant: `https://home.thomega.fr`
 - Immich: `https://photo.thomega.fr`
+- Immich Kiosk: `https://kiosk.thomega.fr`
 - LAN Orangutan: `https://lano.thomega.fr`
-- Nextcloud AIO: `https://nextcloud.thomega.fr`
+- Nextcloud: `https://nextcloud.thomega.fr`
 - OpenSpeedTest: `https://speed.thomega.fr`
 - Portainer: `https://portainer.thomega.fr`
 - QDirStat: `https://qdirstat.thomega.fr`
@@ -209,9 +222,11 @@ docker compose logs -f
 - Pi-hole: `https://hole.thomega.fr`
 - Uptime Kuma: `https://upk.thomega.fr`
 - VS Code: `https://vscode.thomega.fr`
+- What's Up Docker: `https://wud.thomega.fr`
+- Zigbee2MQTT: `https://zigbee2mqtt.thomega.fr`
 
 ## Notes
 
 - `traefik/` creates the shared Docker network `traefik-net`; start this stack before other services that attach to it.
 - `homepage/` also joins `grafana_monitoring` (Loki) and `palworld_default` (Palworld REST API): start `grafana/` and `palworld/` first. Services and game settings are in `homepage/config.yml`.
-- `pihole/` uses macvlan with a static IP (`PIHOLE_IP`) and wildcard DNS for `*.thomega.fr` routed to the server (`SERVER_IP`); set them in `pihole/.env`.
+- `pihole/` uses macvlan with a static IP (`PIHOLE_IP`) and wildcard DNS for `*.thomega.fr` routed to the server (`SERVER_IP`); set them in `pihole/.env`. It is not the LAN DNS/DHCP server anymore (repeated outages, probably from the macvlan network): the ISP box handles both.
