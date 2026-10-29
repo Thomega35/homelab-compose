@@ -105,10 +105,15 @@ fi
 read -ra paths <<< "$BACKUP_PATHS"
 
 log "restic backup ${paths[*]}"
-restic backup --tag homelab --exclude-file "$SCRIPT_DIR/excludes.txt" "${paths[@]}"
+# --ignore-inode: the CIFS shares don't keep stable inode numbers, which made every file look changed
+restic backup --tag homelab --ignore-inode --exclude-file "$SCRIPT_DIR/excludes.txt" "${paths[@]}"
 
 log "restic forget/prune"
-restic forget --tag homelab "${keep[@]}" --prune
+# Not fatal: the metrics and snapshot list below must still be updated
+if ! restic forget --tag homelab "${keep[@]}" --prune; then
+  log "ERROR: forget/prune failed"
+  failed=1
+fi
 repo_metrics nas restic
 snapshots_json nas restic
 

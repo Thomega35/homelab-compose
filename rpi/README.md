@@ -63,6 +63,7 @@ sudo docker-compose up -d
 
 - Metrics: http://<RPI_TAILSCALE_IP>:9100/metrics, scraped by Prometheus on thome-server (job `rpi-node-exporter`)
 - Used by the homepage Storage card: Pi SD card (`/`) and WD My Cloud (`/mnt/wdmycloud`)
+- `/mnt/wdmycloud` is an `x-systemd.automount` CIFS share (`/etc/fstab`): it is only mounted on first access, so `/etc/cron.d/wdmycloud-mount` lists it at boot and every 5 minutes (otherwise it shows as unavailable after a reboot)
 
 Start or update:
 
