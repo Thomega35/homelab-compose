@@ -48,6 +48,8 @@ services:
         bind:
           create_host_path: false
       - restic-cache:/root/.cache/restic
+    labels:
+      - 'wud.watch=false' # locally built image; bump the restic/restic tag in dockerfile_inline instead
     restart: unless-stopped
 
 secrets:

@@ -1,7 +1,7 @@
 services:
   pihole:
     container_name: pihole
-    image: pihole/pihole:latest
+    image: pihole/pihole:2026.05.0
     ports:
       - "800:80/tcp"
     environment:
@@ -28,6 +28,7 @@ services:
         ipv4_address: ${PIHOLE_IP}
       traefik-net:
     labels:
+      - "wud.tag.include=^\\d{4}\\.\\d{2}\\.\\d+$$"
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-net"
       - "traefik.http.routers.hole.rule=Host(`hole.thomega.fr`)"

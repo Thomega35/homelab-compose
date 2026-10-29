@@ -1,6 +1,6 @@
 services:
   wud:
-    image: getwud/wud:latest
+    image: getwud/wud:9.0.2
     container_name: wud
     env_file:
       - ./.env
@@ -13,6 +13,7 @@ services:
     networks:
       - traefik-net
     labels:
+      - 'wud.tag.include=^\d+\.\d+\.\d+$$'
       - 'traefik.enable=true'
       - 'traefik.docker.network=traefik-net'
       - 'traefik.http.routers.wud.rule=Host(`${WUD_HOST:-wud.thomega.fr}`)'

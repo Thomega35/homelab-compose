@@ -1,6 +1,6 @@
 services:
   lan-orangutan:
-    image: ghcr.io/291-group/lan-orangutan:latest
+    image: ghcr.io/291-group/lan-orangutan:3.4.2
     container_name: lan-orangutan
     restart: unless-stopped
     # Host networking is required to scan the real LAN instead of Docker's bridge
@@ -24,6 +24,7 @@ services:
       start_period: 5s
       retries: 3
     labels:
+      - 'wud.tag.include=^\d+\.\d+\.\d+$$'
       - 'traefik.enable=true'
       - 'traefik.http.routers.lan-orangutan.rule=Host(`lano.thomega.fr`)'
       - 'traefik.http.routers.lan-orangutan.entryPoints=websecure'

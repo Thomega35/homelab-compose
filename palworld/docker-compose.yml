@@ -1,7 +1,9 @@
 services:
   palworld:
-    image: thijsvanloef/palworld-server-docker:latest
+    image: thijsvanloef/palworld-server-docker:v2.8.1
     container_name: palworld
+    labels:
+      - 'wud.tag.include=^v\d+\.\d+\.\d+$$'
     restart: unless-stopped
     stop_grace_period: 30s
     ports:

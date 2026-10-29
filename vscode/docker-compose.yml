@@ -1,6 +1,6 @@
 services:
   vscode:
-    image: docker.io/codercom/code-server:latest
+    image: docker.io/codercom/code-server:4.123.0
     restart: unless-stopped
     container_name: vscode
     user: "0:0"
@@ -20,6 +20,7 @@ services:
     networks:
       - traefik-net
     labels:
+      - "wud.tag.include=^\\d+\\.\\d+\\.\\d+$$"
       - "traefik.enable=true"
       - "traefik.http.routers.vscode.rule=Host(`vscode.thomega.fr`)"
       - "traefik.http.routers.vscode.entrypoints=websecure"

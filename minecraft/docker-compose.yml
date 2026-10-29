@@ -1,6 +1,6 @@
 services:
   mc:
-    image: itzg/minecraft-server
+    image: itzg/minecraft-server:2026.8.0
     tty: true
     stdin_open: true
     restart: unless-stopped
@@ -54,6 +54,7 @@ services:
     networks:
       - traefik-net
     labels:
+      - 'wud.tag.include=^\d{4}\.\d+\.\d+$$'
       - 'traefik.enable=true'
       - 'traefik.docker.network=traefik-net'
 

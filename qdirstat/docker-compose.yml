@@ -1,6 +1,6 @@
 services:
   qdirstat:
-    image: docker.io/jlesage/qdirstat:latest
+    image: docker.io/jlesage/qdirstat:v26.09.1
     restart: unless-stopped
     container_name: qdirstat
     environment:
@@ -15,6 +15,7 @@ services:
     networks:
       - traefik-net
     labels:
+      - 'wud.tag.include=^v\d+\.\d+\.\d+$$'
       - "traefik.enable=true"
       - "traefik.http.routers.qdirstat.rule=Host(`qdirstat.thomega.fr`)"
       - "traefik.http.routers.qdirstat.entrypoints=websecure"
