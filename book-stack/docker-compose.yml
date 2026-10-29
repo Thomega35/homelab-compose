@@ -1,6 +1,6 @@
 services:
   bookstack:
-    image: lscr.io/linuxserver/bookstack:latest
+    image: lscr.io/linuxserver/bookstack:version-v26.09.2
     container_name: oscp-bookstack
     restart: unless-stopped
     depends_on:
@@ -39,6 +39,8 @@ services:
       - traefik-net
       - bookstack-internal
     labels:
+      - 'wud.tag.include=^version-v\d+\.\d+\.\d+$$'
+      - 'wud.watch.digest=true'
       - 'traefik.enable=true'
       - 'traefik.docker.network=traefik-net'
       - 'traefik.http.routers.bookstack.rule=Host(`oscp.thomega.fr`)'
@@ -59,6 +61,9 @@ services:
       - /data/many-notes/bookstack/database:/var/lib/mysql
     networks:
       - bookstack-internal
+    labels:
+      - 'wud.tag.include=^11\.4$$'
+      - 'wud.watch.digest=true'
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s

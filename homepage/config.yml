@@ -85,7 +85,7 @@ groups:
       - name: Dawarich
         url: https://dawa.thomega.fr
         icon: dawarich
-        containers: [dawarich_app, dawarich_sidekiq, dawarich_db, dawarich_redis]
+        containers: [dawarich_app, dawarich_db, dawarich_redis]
       - name: Gramps Web
         url: https://gen.thomega.fr
         icon: gramps-web

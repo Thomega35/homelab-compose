@@ -45,7 +45,7 @@ services:
     # command: postgres -c config_file=/etc/postgresql/postgresql.conf # Use custom config, uncomment if you want to use a custom config
 
   dawarich_app:
-    image: freikin/dawarich:1.16.0
+    image: freikin/dawarich:1.19.0
     container_name: dawarich_app
     volumes:
       - /data/dawarich/public:/var/app/public
@@ -63,6 +63,7 @@ services:
     entrypoint: web-entrypoint.sh
     command: ['bin/rails', 'server', '-p', '3000', '-b', '::']
     restart: unless-stopped
+    stop_grace_period: 60s
     environment:
       TZ: Europe/Paris
       RAILS_ENV: ${RAILS_ENV:-production}
@@ -80,11 +81,14 @@ services:
       METRICS_USERNAME: ${METRICS_USERNAME}
       METRICS_PASSWORD: ${METRICS_PASSWORD}
       PROMETHEUS_EXPORTER_PORT: ${PROMETHEUS_EXPORTER_PORT:-9394}
-      SIDEKIQ_METRICS_URL: ${SIDEKIQ_METRICS_URL:-http://dawarich_sidekiq:9394/metrics}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE:-"CHANGE_ME"}
       RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT:-true}
       SELF_HOSTED: ${SELF_HOSTED:-true}
       STORE_GEODATA: ${STORE_GEODATA:-true} 
+      # Background jobs run inside this container since 1.17.0 (no separate sidekiq service)
+      SIDEKIQ_EMBEDDED: 'true'
+      WEB_CONCURRENCY: '0'
+      BACKGROUND_PROCESSING_CONCURRENCY: ${BACKGROUND_PROCESSING_CONCURRENCY:-2}
       OIDC_ISSUER: https://auth.thomega.fr/application/o/dawarich/
       OIDC_CLIENT_ID: ${DAWARICH_OIDC_CLIENT_ID}
       OIDC_CLIENT_SECRET: ${DAWARICH_OIDC_SECRET}
@@ -113,7 +117,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: ${APP_CPU_LIMIT:-0.50}
+          cpus: ${APP_CPU_LIMIT:-1.00}
           memory: ${APP_MEMORY_LIMIT:-4G}
     labels:
       - 'traefik.enable=true'
@@ -121,69 +125,6 @@ services:
       - 'traefik.http.routers.dawarich.rule=Host(`dawa.thomega.fr`)'
       - 'traefik.http.routers.dawarich.entryPoints=websecure'
       - 'traefik.http.services.dawarich.loadbalancer.server.port=3000'
-
-  dawarich_sidekiq:
-    image: freikin/dawarich:1.16.0
-    container_name: dawarich_sidekiq
-    volumes:
-      - /data/dawarich/public:/var/app/public
-      - /data/dawarich/watched:/var/app/tmp/imports/watched
-      - /data/dawarich/storage:/var/app/storage
-    networks:
-      - dawarich
-    stdin_open: true
-    tty: true
-    entrypoint: sidekiq-entrypoint.sh
-    command: ['sidekiq']
-    restart: unless-stopped
-    environment:
-      TZ: Europe/Paris
-      RAILS_ENV: ${RAILS_ENV:-production}
-      REDIS_URL: ${REDIS_URL:-redis://dawarich_redis:6379}
-      DATABASE_HOST: ${DATABASE_HOST:-dawarich_db}
-      DATABASE_PORT: ${DATABASE_PORT:-5432}
-      DATABASE_USERNAME: ${DATABASE_USERNAME:-postgres}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-password}
-      DATABASE_NAME: ${DATABASE_NAME:-dawarich_development}
-      APPLICATION_HOSTS: ${APPLICATION_HOSTS:-localhost,::1,127.0.0.1,dawa.thomega.fr,auth.thomega.fr,dawarich_app}
-      BACKGROUND_PROCESSING_CONCURRENCY: ${BACKGROUND_PROCESSING_CONCURRENCY:-10}
-      APPLICATION_PROTOCOL: ${APPLICATION_PROTOCOL:-http}
-      PROMETHEUS_EXPORTER_ENABLED: ${PROMETHEUS_EXPORTER_ENABLED:-true}
-      SIDEKIQ_METRICS_URL: ${SIDEKIQ_METRICS_URL:-http://dawarich_sidekiq:9394/metrics}
-      METRICS_USERNAME: ${METRICS_USERNAME}
-      METRICS_PASSWORD: ${METRICS_PASSWORD}
-      PROMETHEUS_EXPORTER_PORT: ${PROMETHEUS_EXPORTER_PORT:-9394}
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-"CHANGE_ME"}
-      RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT:-true}
-      SELF_HOSTED: ${SELF_HOSTED:-true}
-      STORE_GEODATA: ${STORE_GEODATA:-true}
-      OIDC_ISSUER: ${OIDC_ISSUER:-https://auth.thomega.fr/application/o/dawarich/}
-      OIDC_CLIENT_ID: ${DAWARICH_OIDC_CLIENT_ID}
-      OIDC_CLIENT_SECRET: ${DAWARICH_OIDC_SECRET}
-      OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI:-https://dawa.thomega.fr/users/auth/openid_connect/callback}
-      OIDC_AUTO_REGISTER: true
-      ALLOW_EMAIL_PASSWORD_REGISTRATION: false
-    logging:
-      driver: "json-file"
-      options:
-        max-size: ${LOG_MAX_SIZE:-100m}
-        max-file: ${LOG_MAX_FILE:-5}
-    healthcheck:
-      test: [ "CMD-SHELL", "pgrep -f sidekiq" ]
-      interval: 10s
-      retries: 30
-      start_period: 30s
-      timeout: 10s
-    depends_on:
-      dawarich_db:
-        condition: service_healthy
-        restart: true
-      dawarich_redis:
-        condition: service_healthy
-        restart: true
-      dawarich_app:
-        condition: service_healthy
-        restart: true
 
 networks:
   dawarich:
