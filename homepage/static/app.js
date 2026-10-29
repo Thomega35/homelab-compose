@@ -140,12 +140,15 @@ function renderBackups(repos) {
     h("div", { class: "backups" }, repos.map((r) => {
       const snaps = r.snapshots ?? [];
       const latest = snaps[0];
-      const late = latest && r.max_age_hours != null && Date.now() - latest.time > r.max_age_hours * 3600e3;
+      const age = latest && (Date.now() - latest.time) / 1000;
+      const late = latest && r.max_age_hours != null && age > r.max_age_hours * 3600;
       return h("div", {},
         h("div", { class: "metric-head" },
           h("span", {}, h("strong", {}, r.name), h("span", { class: "muted small" }, ` ${snaps.length} snapshots`)),
           latest
-            ? h("span", { class: `pill ${late ? "starting" : "online"}`, title: dateTime(latest.time) }, `Latest ${ago(latest.time)}`)
+            ? h("span", { class: `pill ${late ? "starting" : "online"}`, title: dateTime(latest.time) },
+              // ago() shows the date after 24 h: add the age too
+              `Latest ${ago(latest.time)}${age >= 86400 ? ` (${duration(age)} ago)` : ""}`)
             : h("span", { class: "pill offline" }, "No data")),
         snaps.length > 0 && h("ul", { class: "logs snapshots" }, snaps.map((s) => h("li", {},
           h("time", { title: new Date(s.time).toLocaleString() }, dateTime(s.time)),
