@@ -1,6 +1,6 @@
 services:
   mc:
-    image: itzg/minecraft-server:2026.8.0
+    image: itzg/minecraft-server:2026.10.1
     tty: true
     stdin_open: true
     restart: unless-stopped
