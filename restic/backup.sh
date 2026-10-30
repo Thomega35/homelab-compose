@@ -106,7 +106,9 @@ read -ra paths <<< "$BACKUP_PATHS"
 
 log "restic backup ${paths[*]}"
 # --ignore-inode: the CIFS shares don't keep stable inode numbers, which made every file look changed
-restic backup --tag homelab --ignore-inode --exclude-file "$SCRIPT_DIR/excludes.txt" "${paths[@]}"
+# --group-by host,tags: pick the parent snapshot regardless of paths, else changing BACKUP_PATHS re-reads every file
+# --no-scan: the size estimate (progress %) is a second full walk of every path, costly on the CIFS shares
+restic backup --tag homelab --ignore-inode --no-scan --group-by host,tags --exclude-file "$SCRIPT_DIR/excludes.txt" "${paths[@]}"
 
 log "restic forget/prune"
 # Not fatal: the metrics and snapshot list below must still be updated

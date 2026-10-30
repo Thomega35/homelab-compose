@@ -9,7 +9,8 @@ services:
       WEBPASSWORD: '${WEBPASSWORD}'
       FTLCONF_webserver_api_password: '${WEBPASSWORD}'
       FTLCONF_dns_listeningMode: 'ALL'
-      FTLCONF_dhcp_active: 'true'
+      # The ISP box is the LAN DHCP server; enabling this too would put two DHCP servers on the LAN
+      FTLCONF_dhcp_active: 'false'
       FTLCONF_dhcp_start: '${DHCP_START}'
       FTLCONF_dhcp_end: '${DHCP_END}'
       FTLCONF_dhcp_router: '${LAN_GATEWAY}'

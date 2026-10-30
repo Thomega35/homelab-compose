@@ -36,6 +36,7 @@ services:
       - /data/grafana/textfile:/data/grafana/textfile # storage metrics for node-exporter (homepage)
       - /home/thome/homelab-compose:/home/thome/homelab-compose:ro
       - /home/thome/makabe:/home/thome/makabe:ro
+      - /home/thome/LabOrchestra:/home/thome/LabOrchestra:ro
       - type: bind # NAS shares (Immich uploads); rslave so remounts are seen
         source: /mnt
         target: /mnt

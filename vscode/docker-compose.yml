@@ -1,6 +1,6 @@
 services:
   vscode:
-    image: docker.io/codercom/code-server:4.123.0
+    image: docker.io/codercom/code-server:4.144.0
     restart: unless-stopped
     container_name: vscode
     user: "0:0"

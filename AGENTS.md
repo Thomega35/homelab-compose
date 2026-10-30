@@ -21,7 +21,7 @@ Docker Compose stacks for a single homelab server (`thome-server`) plus a Raspbe
 
 - The agent runs in the `vscode` container (code-server, as root) with the host Docker socket and CLI; `/data` and `/home/thome` are mounted at the same paths. No `python3`, `jq` or `node`: use `docker exec <container> ...` or a throwaway container.
 - Host shell: `docker run --rm --privileged --pid=host alpine nsenter -t 1 -m -u -i -n -p -- sh -c '...'`; read-only inspection: `docker run --rm -v /:/host:ro alpine ...`.
-- `/home/thome/makabe` and `/home/thome/LabOrchestra` are separate Compose projects outside this repo (`fanfare-makabes.fr`, their own Watchtower), served by the same Traefik and backed up by restic. Leave them alone.
+- `/home/thome/makabe` and `/home/thome/LabOrchestra` are separate Compose projects outside this repo (`fanfare-makabes.fr`, their own Watchtower), served by the same Traefik. Both are backed up by restic (`makabe` also through the `makabe-db` dump). Leave them alone.
 
 ## Before acting
 
@@ -42,7 +42,8 @@ The ISP box is the LAN DHCP and DNS server (the server uses it too). Pi-hole is 
 - Runs in the `restic` container; `crond` calls `backup.sh` every 2 h, with `--ha` daily at 02:00 and `--push` (copy to the Pi's WD My Cloud over SFTP) Monday and Thursday at 02:00. Logs: `docker logs restic`.
 - `backup.sh` is bind-mounted and bash reads it while running. Check `docker exec restic pgrep -fl 'backup.sh|restic'` before editing it. While a run is in progress, write the new version to a temporary file and `mv` it over `backup.sh` (new inode), never edit in place, and delete the temporary file.
 - A run takes ~2 h; overlapping runs exit with "Another backup is already running", which also skips a scheduled push.
-- Keep `--ignore-inode`: the CIFS shares have unstable inode numbers, without it every file looks changed and runs take 4-7 h.
+- Keep `--ignore-inode`: the CIFS shares have unstable inode numbers, without it every file looks changed and runs take 4-7 h. Keep `--group-by host,tags` on `restic backup` too: by default the parent snapshot is matched by paths, so changing `BACKUP_PATHS` would re-read the whole ~1 TB.
+- New path in `BACKUP_PATHS`: also mount it in `docker-compose.yml` and recreate the container at the same time, between two runs. A path missing in the container makes `restic backup` fail and the script stop.
 - Manual push: `docker exec -d restic sh -c '/home/thome/homelab-compose/restic/backup.sh --push > /proc/1/fd/1 2>&1'` (backup, prune, then copy).
 - "repository is already locked" with an old lock date means a stale lock (container restarted mid-run): `docker exec restic restic unlock` removes only stale locks.
 - `backup.sh` writes `/data/backups/snapshots/{nas,rpi}.json` and `/data/grafana/textfile/*.prom`, read by the homepage Backups and Storage cards.
