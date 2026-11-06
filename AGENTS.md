@@ -12,10 +12,12 @@ Docker Compose stacks for a single homelab server (`thome-server`) plus a Raspbe
 
 - One folder per stack with its `docker-compose.yml`; extra config files next to it. Persistent data lives in `/data/<stack>`, not in the repo.
 - Web apps: on the external `traefik-net` network, `traefik.enable=true`, router on the `websecure` entrypoint, `Host(...)` on `thomega.fr` subdomains, `traefik.docker.network=traefik-net`. TLS and the wildcard Let's Encrypt certificate are set on the `websecure` entrypoint, so routers don't need `tls.certresolver`.
-- Auth: either the `authentik-auth@docker` forward-auth middleware, or the app's own OIDC login with Authentik. Public only on purpose.
+- Auth: prefer the app's own OAuth2/OIDC login with Authentik (`.env` client settings, `.env.dist` placeholders) whenever the app supports it. Otherwise put it behind the `authentik-auth@docker` forward-auth middleware, which needs an Authentik proxy provider (forward auth, single application) for the host, attached to the embedded outpost, and disable the app's own login when it can without losing features (single login through Authentik; The Lounge keeps its accounts, since its public mode drops the IRC connection and history when the tab closes). Public only on purpose.
+- Authentik objects can be created with `docker exec authentik_server ak shell -c '...'` (Django ORM); copy flows and property mappings from an existing provider of the same type. Every application gets `meta_icon` set to its dashboard-icons URL (`https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/<name>.svg`, as in the homepage `config.yml`). Proxy providers: `external_host` with a trailing slash, then `set_oauth_defaults()` and `save()`, otherwise the redirect URIs are missing or mismatched ("Redirect URI Error"). OAuth2 providers: set the exact callback URL from the app's docs as a strict redirect URI. Check the login redirect with curl afterwards. Access rights follow the application group (homepage group of the same name): `App Admin` bound to the `admin` group, `App Admin/Tech Bro` to `admin` + `Techos Friends`.
 - Pin image versions (no `latest`). Update checks by What's Up Docker: use `wud.tag.include`/`wud.tag.exclude`/`wud.watch.digest` labels to match the image's tag scheme, `wud.watch=false` for locally built images.
 - New or removed stack: update the README (service list, mermaid graph, authentication table, URLs) and the homepage `config.yml` service list.
 - Comments explain why, in English. Commit messages: one imperative sentence describing the change.
+- When the user teaches a new convention or a fix during a chat, add it to this file without being asked.
 
 ## Environment
 

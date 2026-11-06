@@ -28,6 +28,7 @@ Simple Docker Compose files for my homelab services.
 - `rustdesk/`: RustDesk self-hosted server (hbbs + hbbr)
 - `screeps/`: Screeps relay UI behind Traefik + Authentik
 - `super-productivity/`: Super Productivity + WebDAV sync behind Traefik
+- `thelounge/`: The Lounge web IRC client behind Traefik + Authentik (private mode: own account, persistent connection)
 - `traefik/`: Reverse proxy + TLS (Let's Encrypt DNS challenge with Cloudflare) + Cloudflare DDNS
 - `uptime-kuma/`: Uptime Kuma monitoring dashboard
 - `vscode/`: code-server exposed behind Traefik + Authentik
@@ -64,6 +65,7 @@ graph LR
         Bentopdf[BentoPDF]
         LanOrangutan[LAN Orangutan]
         Pihole[Pi-hole]
+        TheLounge[The Lounge]
     end
 
     subgraph OIDC["Authentik OAuth2 / OIDC (app login)"]
@@ -161,7 +163,7 @@ Every web app goes through Traefik. Authentik (`auth.thomega.fr`) protects them 
 
 | Mode | Apps |
 | --- | --- |
-| **Forward-auth** (Traefik `authentik-auth@docker` middleware + Authentik proxy provider, login before the app loads) | Homepage, Traefik dashboard, Prometheus, Immich Kiosk, Zigbee2MQTT, BentoPDF, Screeps, Super Productivity, Uptime Kuma, What's Up Docker, Pi-hole (`/admin/img` + `/api` bypass), LAN Orangutan, QDirStat, VS Code |
+| **Forward-auth** (Traefik `authentik-auth@docker` middleware + Authentik proxy provider, login before the app loads) | Homepage, Traefik dashboard, Prometheus, Immich Kiosk, Zigbee2MQTT, BentoPDF, Screeps, Super Productivity, Uptime Kuma, What's Up Docker, Pi-hole (`/admin/img` + `/api` bypass), LAN Orangutan, QDirStat, VS Code, The Lounge |
 | **OAuth2 / OIDC** (Authentik OAuth2 provider, "Login with Authentik" in the app) | Grafana, Immich, Nextcloud, Home Assistant, Portainer, Dawarich, Excalidash, MeshCentral, Gramps Web, BookStack |
 | **None** (public) | OpenSpeedTest, BlueMap (Minecraft map) |
 
@@ -215,6 +217,7 @@ docker compose logs -f
 - RustDesk server: `https://rust.thomega.fr`
 - Screeps: `https://screeps.thomega.fr`
 - Super Productivity: `https://sp.thomega.fr`
+- The Lounge (IRC): `https://irc.thomega.fr`
 - Traefik dashboard: `https://traefik.thomega.fr`
 - Authentik: `https://auth.thomega.fr`
 - MeshCentral: `https://mesh.thomega.fr`

@@ -166,6 +166,10 @@ groups:
         url: https://vscode.thomega.fr
         icon: vscode
         containers: [vscode]
+      - name: The Lounge
+        url: https://irc.thomega.fr
+        icon: thelounge
+        containers: [thelounge]
       - name: RustDesk
         description: hbbs + hbbr relay
         icon: rustdesk

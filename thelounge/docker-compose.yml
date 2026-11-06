@@ -1,0 +1,22 @@
+services:
+  thelounge:
+    image: ghcr.io/thelounge/thelounge:4.5.2
+    container_name: thelounge
+    restart: unless-stopped
+    volumes:
+      # config.js, users/ and logs/: private mode keeps IRC connected and history saved when the tab closes
+      - /data/thelounge:/var/opt/thelounge
+    networks:
+      - traefik-net
+    labels:
+      - 'wud.tag.include=^\d+\.\d+\.\d+$$'
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.thelounge.rule=Host(`irc.thomega.fr`)'
+      - 'traefik.http.routers.thelounge.entryPoints=websecure'
+      - 'traefik.http.routers.thelounge.middlewares=authentik-auth@docker'
+      - 'traefik.http.services.thelounge.loadbalancer.server.port=9000'
+      - 'traefik.docker.network=traefik-net'
+
+networks:
+  traefik-net:
+    external: true
