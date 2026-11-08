@@ -20,8 +20,8 @@ services:
       timeout: 10s
 
   dawarich_db:
-    image: postgis/postgis:17-3.6-alpine
-    # image: imresamu/postgis:17-3.6-alpine # If you're on ARM architecture, use this image instead
+    image: postgis/postgis:17-3.7-alpine
+    # image: imresamu/postgis:17-3.7-alpine # If you're on ARM architecture, use this image instead
     shm_size: 1G
     container_name: dawarich_db
     labels:
@@ -45,7 +45,7 @@ services:
     # command: postgres -c config_file=/etc/postgresql/postgresql.conf # Use custom config, uncomment if you want to use a custom config
 
   dawarich_app:
-    image: freikin/dawarich:1.19.0
+    image: freikin/dawarich:1.22.0
     container_name: dawarich_app
     volumes:
       - /data/dawarich/public:/var/app/public

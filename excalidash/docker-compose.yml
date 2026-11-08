@@ -1,6 +1,6 @@
 services:
   backend:
-    image: zimengxiong/excalidash-backend:0.5.1
+    image: zimengxiong/excalidash-backend:0.6.6
     container_name: excalidash-backend
     labels:
       - 'wud.tag.include=^\d+\.\d+\.\d+$$'
@@ -15,6 +15,7 @@ services:
       - ENFORCE_HTTPS_REDIRECT=false
       - JWT_SECRET=${JWT_SECRET}
       - CSRF_SECRET=${CSRF_SECRET}
+      - API_KEY_HASH_PEPPER=${API_KEY_HASH_PEPPER}
       - OIDC_PROVIDER_NAME=${OIDC_PROVIDER_NAME:-Authentik}
       - OIDC_ISSUER_URL=${OIDC_ISSUER_URL}
       - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
@@ -42,7 +43,7 @@ services:
       retries: 3
 
   frontend:
-    image: zimengxiong/excalidash-frontend:0.5.1
+    image: zimengxiong/excalidash-frontend:0.6.6
     container_name: excalidash-frontend
     environment:
       - BACKEND_URL=backend:8000

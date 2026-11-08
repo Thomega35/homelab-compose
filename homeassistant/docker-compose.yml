@@ -2,7 +2,7 @@ services:
   homeassistant:
     container_name: homeassistant
     hostname: homeassistant
-    image: ghcr.io/home-assistant/home-assistant:2026.10
+    image: ghcr.io/home-assistant/home-assistant:2026.11
     env_file:
       - /data/Homeassistant/core/.env
     volumes:
@@ -30,7 +30,7 @@ services:
 
   zigbee2mqtt:
     container_name: zigbee2mqtt
-    image: ghcr.io/koenkk/zigbee2mqtt:2.14.2
+    image: ghcr.io/koenkk/zigbee2mqtt:2.14.3
     restart: unless-stopped
     volumes:
       - /data/Homeassistant/zigbee2mqtt:/app/data

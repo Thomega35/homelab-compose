@@ -58,11 +58,14 @@ services:
       - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
     shm_size: 128mb
     restart: unless-stopped
+    labels:
+      # Pinned by Immich's release compose file; a Postgres major bump needs a manual migration
+      - 'wud.watch=false'
     networks:
       - immich-net
 
   immich-kiosk:
-    image: ghcr.io/damongolding/immich-kiosk:0.45.2
+    image: ghcr.io/damongolding/immich-kiosk:0.47.0
     container_name: immich-kiosk
     tty: true
     env_file:
