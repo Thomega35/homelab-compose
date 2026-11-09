@@ -23,6 +23,7 @@ Docker Compose stacks for a single homelab server (`thome-server`) plus a Raspbe
 
 - The agent runs in the `vscode` container (code-server, as root) with the host Docker socket and CLI; `/data` and `/home/thome` are mounted at the same paths. No `python3`, `jq` or `node`: use `docker exec <container> ...` or a throwaway container.
 - Host shell: `docker run --rm --privileged --pid=host alpine nsenter -t 1 -m -u -i -n -p -- sh -c '...'`; read-only inspection: `docker run --rm -v /:/host:ro alpine ...`.
+- NAS CIFS shares `/mnt/nas` and `/mnt/nas-images` are host fstab mounts. NetworkManager can report online too early at boot, so a docker.service drop-in (`/etc/systemd/system/docker.service.d/wait-nas.conf` → `/usr/local/sbin/wait-nas-mounts.sh`) retries them for 60 s before Docker starts (details: README "Host: NAS mounts before Docker"). If they are missing anyway (restic exits 127 "open /mnt/nas/backups", Immich restarts on `.immich` folder checks): `systemctl start mnt-nas.mount 'mnt-nas\x2dimages.mount'` on the host, then restart restic, Immich and Nextcloud.
 - `/home/thome/makabe` and `/home/thome/LabOrchestra` are separate Compose projects outside this repo (`fanfare-makabes.fr`, their own Watchtower), served by the same Traefik. Both are backed up by restic (`makabe` also through the `makabe-db` dump). Leave them alone.
 
 ## Before acting

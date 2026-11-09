@@ -233,3 +233,47 @@ docker compose logs -f
 - `traefik/` creates the shared Docker network `traefik-net`; start this stack before other services that attach to it.
 - `homepage/` also joins `grafana_monitoring` (Loki) and `palworld_default` (Palworld REST API): start `grafana/` and `palworld/` first. Services and game settings are in `homepage/config.yml`.
 - `pihole/` uses macvlan with a static IP (`PIHOLE_IP`) and wildcard DNS for `*.thomega.fr` routed to the server (`SERVER_IP`); set them in `pihole/.env`. It is not the LAN DNS/DHCP server anymore (repeated outages, probably from the macvlan network): the ISP box handles both.
+
+## Host: NAS mounts before Docker
+
+The NAS shares `/mnt/nas` (restic repository, Nextcloud data) and `/mnt/nas-images` (Immich uploads) are CIFS mounts in the host `/etc/fstab` (`_netdev`). NetworkManager can report the network online at boot before the LAN interface has an address. The mounts then fail with `cifs_mount failed w/return code = -101` (network unreachable) and Docker starts with empty mountpoints:
+
+- `restic` exits with code 127: `open /mnt/nas/backups: no such file or directory`.
+- `immich_server` restarts in a loop: `Failed to read ... encoded-video/.immich`.
+
+A `docker.service` drop-in retries the mounts for up to 60 s before Docker starts. If the NAS is still unreachable, Docker starts anyway so the other apps keep working.
+
+`/etc/systemd/system/docker.service.d/wait-nas.conf`:
+
+```ini
+# NetworkManager reports online before the LAN has an address, so the boot CIFS mounts can fail.
+[Service]
+ExecStartPre=-/usr/local/sbin/wait-nas-mounts.sh
+```
+
+`/usr/local/sbin/wait-nas-mounts.sh` (mode `0755`):
+
+```sh
+#!/bin/sh
+# Retry the NAS CIFS mounts before Docker starts, so containers don't bind-mount empty mountpoints.
+for i in $(seq 1 12); do
+    ok=1
+    for m in /mnt/nas /mnt/nas-images; do
+        mountpoint -q "$m" || mount "$m" 2>/dev/null || ok=0
+    done
+    [ "$ok" = 1 ] && exit 0
+    sleep 5
+done
+echo "NAS mounts still missing, starting Docker anyway" >&2
+exit 0
+```
+
+Apply with `sudo systemctl daemon-reload`; check with `systemctl cat docker.service`. The script's output is in `journalctl -b -u docker`.
+
+If the shares are still missing after boot (NAS down at the time), mount them and restart the containers that use them:
+
+```bash
+sudo systemctl start mnt-nas.mount 'mnt-nas\x2dimages.mount'
+docker restart restic immich_server
+cd nextcloud && docker compose restart
+```
