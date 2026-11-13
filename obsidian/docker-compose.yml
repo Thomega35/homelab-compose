@@ -1,0 +1,27 @@
+services:
+  obsidian:
+    image: lscr.io/linuxserver/obsidian:v1.15.0-ls152
+    container_name: obsidian
+    restart: unless-stopped
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/Paris
+    volumes:
+      # Vaults are folders under /config (e.g. /config/Obsidian Vault)
+      - /data/obsidian/config:/config
+    shm_size: 1gb
+    networks:
+      - traefik-net
+    labels:
+      - 'wud.tag.include=^v\d+\.\d+\.\d+-ls\d+$$'
+      - "traefik.enable=true"
+      - "traefik.http.routers.obsidian.rule=Host(`obsidian.thomega.fr`)"
+      - "traefik.http.routers.obsidian.entrypoints=websecure"
+      - "traefik.http.services.obsidian.loadbalancer.server.port=3000"
+      - "traefik.http.routers.obsidian.middlewares=authentik-auth@docker"
+      - "traefik.docker.network=traefik-net"
+
+networks:
+  traefik-net:
+    external: true

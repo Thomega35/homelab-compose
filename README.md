@@ -18,6 +18,7 @@ Simple Docker Compose files for my homelab services.
 - `minecraft/`: Minecraft server with the BlueMap web map
 - `book-stack/`: BookStack OSCP documentation with native Authentik OIDC and MariaDB
 - `nextcloud/`: Nextcloud with Postgres and Redis, data on the NAS
+- `obsidian/`: Obsidian desktop app in the browser (Selkies), vaults in `/data/obsidian/config`, behind Traefik + Authentik
 - `openspeedtest/`: OpenSpeedTest self-hosted speed test server
 - `palworld/`: Palworld dedicated server with a Discord whitelist bot
 - `pihole/`: Pi-hole DNS (macvlan), not the LAN default: the ISP box does DHCP and DNS, currently under maintenance
@@ -66,6 +67,7 @@ graph LR
         LanOrangutan[LAN Orangutan]
         Pihole[Pi-hole]
         TheLounge[The Lounge]
+        Obsidian
     end
 
     subgraph OIDC["Authentik OAuth2 / OIDC (app login)"]
@@ -163,7 +165,7 @@ Every web app goes through Traefik. Authentik (`auth.thomega.fr`) protects them 
 
 | Mode | Apps |
 | --- | --- |
-| **Forward-auth** (Traefik `authentik-auth@docker` middleware + Authentik proxy provider, login before the app loads) | Homepage, Traefik dashboard, Prometheus, Immich Kiosk, Zigbee2MQTT, BentoPDF, Screeps, Super Productivity, Uptime Kuma, What's Up Docker, Pi-hole (`/admin/img` + `/api` bypass), LAN Orangutan, QDirStat, VS Code, The Lounge |
+| **Forward-auth** (Traefik `authentik-auth@docker` middleware + Authentik proxy provider, login before the app loads) | Homepage, Traefik dashboard, Prometheus, Immich Kiosk, Zigbee2MQTT, BentoPDF, Screeps, Super Productivity, Uptime Kuma, What's Up Docker, Pi-hole (`/admin/img` + `/api` bypass), LAN Orangutan, QDirStat, VS Code, The Lounge, Obsidian |
 | **OAuth2 / OIDC** (Authentik OAuth2 provider, "Login with Authentik" in the app) | Grafana, Immich, Nextcloud, Home Assistant, Portainer, Dawarich, Excalidash, MeshCentral, Gramps Web, BookStack |
 | **None** (public) | OpenSpeedTest, BlueMap (Minecraft map) |
 
@@ -211,6 +213,7 @@ docker compose logs -f
 - Immich Kiosk: `https://kiosk.thomega.fr`
 - LAN Orangutan: `https://lano.thomega.fr`
 - Nextcloud: `https://nextcloud.thomega.fr`
+- Obsidian: `https://obsidian.thomega.fr`
 - OpenSpeedTest: `https://speed.thomega.fr`
 - Portainer: `https://portainer.thomega.fr`
 - QDirStat: `https://qdirstat.thomega.fr`

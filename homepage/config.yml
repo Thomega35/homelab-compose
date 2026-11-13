@@ -170,6 +170,10 @@ groups:
         url: https://irc.thomega.fr
         icon: thelounge
         containers: [thelounge]
+      - name: Obsidian
+        url: https://obsidian.thomega.fr
+        icon: obsidian
+        containers: [obsidian]
       - name: RustDesk
         description: hbbs + hbbr relay
         icon: rustdesk

@@ -57,12 +57,19 @@ The ISP box is the LAN DHCP and DNS server (the server uses it too). Pi-hole is 
 
 ## BookStack (`book-stack/`)
 
+- Keep OSCP maintenance scripts, browser tests and their guide in `/data/many-notes/bookstack/tools/oscp/`, outside this Git repository. The installed pages and variable helper are stored in BookStack, not loaded from those source files.
 - The OSCP site requires Authentik login. For authorized local maintenance, the app is in `/app/www` inside `oscp-bookstack`, with persistent config at `/config`. Bootstrap PHP with `vendor/autoload.php`, `bootstrap/app.php`, then the console kernel; inspect the current models and methods before using them.
 - Use native `PageRepo::update` under the appropriate existing user, not direct SQL updates, to retain revisions, search indexing and reference updates. Use it for renames too, since titles can change page slugs and links.
 - Before changing pages, save a private backup outside the repo (e.g. `/config/backups`, files mode `0600`), check for edit drafts and concurrent changes, and preview the result. Wrap related updates and their validation in a database transaction.
 - BookStack regenerates HTML IDs unless they start with `bkmrk`. Give imported elements unique `bkmrk-...` IDs; otherwise inserted examples can take existing bookmark IDs and break links. Verify existing bookmarks and their text after native HTML formatting.
 - When integrating notes into a course, distribute code and explanations into the matching sections without overwriting existing content. Preserve the source page unchanged unless explicitly asked otherwise; verify every source code block was copied and unrelated pages remain unchanged.
 - Use topic-specific titles for command collections (e.g. “Web Applications and Client-Side Attacks Commands”), since there may be several such pages. Do not silently correct source snippets or execute them while reorganizing documentation.
+- In command generators, show the exact variable name in each form label alongside its French description, and use the same name in validation messages (e.g. `SMB_SHARE (Partage SMB)`).
+- Keep Step-by-Step Commands free of legacy-page reference lists and compatibility-navigation sections; retain the commands and current course links only.
+- OSCP report values are saved with the page (not temporary browser forms), with command-output blocks and captioned screenshot slots. Exam uses native Markdown and BookStack's automatically generated heading bookmarks, without explicit or trailing legacy HTML anchors. Link to the existing enumeration section with `step-by-step-commands#bkmrk-oscp-enumeration`. Training Labs retains its visual-editor format. Keep the Exam structure: three standalone machines with initial-access and privilege-escalation parts, followed by Active Directory.
+- Keep Exam compact: credentials are username/password/usage lists, with NT hashes only for AD; Nmap/ffuf are screenshots only. Merge each access/escalation path with its proof. No key/source metadata, generic extra-service sections, or cleanup. Do not apply these Exam-only changes to Training Labs without a request.
+- Keep Exam's UTC introduction, sensitive-data notice, `STARTED_UTC`/`FINISHED_UTC`, and per-machine `OPEN_PORTS`/`TARGET_URL`/`MACHINE_STATUS`. AD hosts use host/role, IP/network access, services/URL and status/proof columns; keep a short users/groups/notes section separate from credentials.
+- Write the entire Exam report in English, including headings, field descriptions, table columns, notices and screenshot captions. Keep variable names unchanged and use native generated bookmarks; do not translate other course pages or the French command generator as part of this rule.
 
 ## Raspberry Pi (`rpi/`)
 
