@@ -1,6 +1,6 @@
 services:
   qdirstat:
-    image: docker.io/jlesage/qdirstat:v26.09.1
+    image: docker.io/jlesage/qdirstat:v26.11.3
     restart: unless-stopped
     container_name: qdirstat
     environment:

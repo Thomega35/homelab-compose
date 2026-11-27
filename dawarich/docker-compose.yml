@@ -1,6 +1,6 @@
 services:
   dawarich_redis:
-    image: redis:8.10-trixie
+    image: redis:8.12-trixie
     container_name: dawarich_redis
     command: >
       redis-server
@@ -45,7 +45,7 @@ services:
     # command: postgres -c config_file=/etc/postgresql/postgresql.conf # Use custom config, uncomment if you want to use a custom config
 
   dawarich_app:
-    image: freikin/dawarich:1.22.0
+    image: freikin/dawarich:1.23.0
     container_name: dawarich_app
     volumes:
       - /data/dawarich/public:/var/app/public

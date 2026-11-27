@@ -170,6 +170,14 @@ groups:
         url: https://irc.thomega.fr
         icon: thelounge
         containers: [thelounge]
+      - name: Beeper WhatsApp
+        description: Self-hosted Beeper bridge
+        icon: whatsapp
+        containers: [beeper-sh-whatsapp]
+      - name: Beeper Instagram
+        description: Self-hosted Beeper bridge
+        icon: instagram
+        containers: [beeper-sh-instagram]
       - name: Obsidian
         url: https://obsidian.thomega.fr
         icon: obsidian

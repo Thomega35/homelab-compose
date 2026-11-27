@@ -1,6 +1,6 @@
 services:
   obsidian:
-    image: lscr.io/linuxserver/obsidian:v1.15.0-ls152
+    image: lscr.io/linuxserver/obsidian:v1.15.1-ls154
     container_name: obsidian
     restart: unless-stopped
     environment:
