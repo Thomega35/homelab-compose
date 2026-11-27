@@ -22,6 +22,7 @@ services:
         0 0,4,6,8,10,12,14,16,18,20,22 * * * /home/thome/homelab-compose/restic/backup.sh > /proc/1/fd/1 2>&1
         0 2 * * 0,2,3,5,6 /home/thome/homelab-compose/restic/backup.sh --ha > /proc/1/fd/1 2>&1
         0 2 * * 1,4 /home/thome/homelab-compose/restic/backup.sh --ha --push > /proc/1/fd/1 2>&1
+        * * * * * bash /home/thome/homelab-compose/restic/container-restarts.sh > /proc/1/fd/1 2>&1
         EOF
         exec crond -f -l 8
     secrets:
@@ -32,8 +33,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # docker exec for pg_dumpall
       - /data:/data:ro
-      - /data/backups:/data/backups # Postgres dumps
-      - /data/grafana/textfile:/data/grafana/textfile # storage metrics for node-exporter (homepage)
+      - /data/backups:/data/backups # SQL database dumps
+      - /data/grafana/textfile:/data/grafana/textfile # storage and restart metrics for node-exporter
       - /home/thome/homelab-compose:/home/thome/homelab-compose:ro
       - /home/thome/makabe:/home/thome/makabe:ro
       - /home/thome/LabOrchestra:/home/thome/LabOrchestra:ro
