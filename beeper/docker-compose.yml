@@ -1,0 +1,28 @@
+services:
+  beeper-whatsapp:
+    image: ghcr.io/beeper/bridge-manager:649659929de880afdb24503f8908c5cf3da3a20e
+    container_name: beeper-sh-whatsapp
+    env_file: .env
+    environment:
+      TZ: Europe/Paris
+    command: sh-whatsapp
+    volumes:
+      - /data/beeper/sh-whatsapp:/data
+    labels:
+      # GHCR publishes commit-hash tags plus latest, so WUD cannot rank updates.
+      - 'wud.watch=false'
+    restart: unless-stopped
+
+  beeper-instagram:
+    image: ghcr.io/beeper/bridge-manager:649659929de880afdb24503f8908c5cf3da3a20e
+    container_name: beeper-sh-instagram
+    env_file: .env
+    environment:
+      TZ: Europe/Paris
+    command: sh-instagram
+    volumes:
+      - /data/beeper/sh-instagram:/data
+    labels:
+      # GHCR publishes commit-hash tags plus latest, so WUD cannot rank updates.
+      - 'wud.watch=false'
+    restart: unless-stopped

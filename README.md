@@ -5,6 +5,7 @@ Simple Docker Compose files for my homelab services.
 ## Services
 
 - `authentik/`: Identity provider and forward-auth middleware for Traefik
+- `beeper/`: Self-hosted Beeper Bridge Manager for WhatsApp and Instagram
 - `bentopdf/`: BentoPDF client-side PDF toolbox behind Traefik + Authentik
 - `dawarich/`: Dawarich location history (Postgres/PostGIS, Redis) with Authentik OIDC login
 - `excalidash/`: Excalidash Excalidraw dashboard (frontend + backend) with Authentik OIDC login
@@ -157,6 +158,7 @@ graph LR
     Portainer -.-> Docker
 
     Rustdesk[RustDesk hbbs] --> Hbbr[RustDesk hbbr]
+    BeeperBridge[Beeper WhatsApp and Instagram bridges] -->|outbound websocket| Internet
 ```
 
 ## Authentication
@@ -169,7 +171,7 @@ Every web app goes through Traefik. Authentik (`auth.thomega.fr`) protects them 
 | **OAuth2 / OIDC** (Authentik OAuth2 provider, "Login with Authentik" in the app) | Grafana, Immich, Nextcloud, Home Assistant, Portainer, Dawarich, Excalidash, MeshCentral, Gramps Web, BookStack |
 | **None** (public) | OpenSpeedTest, BlueMap (Minecraft map) |
 
-Not web apps: RustDesk, Minecraft, Palworld, Restic. The Pi services (`rpi/`) are LAN-only.
+Not web apps: RustDesk, Minecraft, Palworld, Restic, Beeper bridges. The Pi services (`rpi/`) are LAN-only.
 
 Most OIDC clients are configured in each app's UI (Immich, Nextcloud, Home Assistant, Portainer). The `.env`-based clients are Grafana, Dawarich, Excalidash, BookStack, and Gramps Web; MeshCentral uses `config.json`.
 
