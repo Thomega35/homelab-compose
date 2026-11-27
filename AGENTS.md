@@ -7,6 +7,7 @@ Docker Compose stacks for a single homelab server (`thome-server`) plus a Raspbe
 - Secrets, tokens, passwords, IPs (LAN or Tailscale) or internal hostnames. Use placeholders such as `<RPI_TAILSCALE_IP>`.
 - `.env`, `config.json`, `*/secrets/*` are ignored; each has a committed `.dist` template with placeholder values. Adding a variable or secret means updating the `.dist` too.
 - Never print the content of a secret file in the terminal or chat; refer to it by path.
+- `todo.md` is a local-only personal checklist, ignored by Git. Never force-add or commit it.
 
 ## Conventions
 
@@ -69,6 +70,8 @@ The ISP box is the LAN DHCP and DNS server (the server uses it too). Pi-hole is 
 
 - Runs in the `restic` container; `crond` calls `backup.sh` every 2 h, with `--ha` daily at 02:00 and `--push` (copy to the Pi's WD My Cloud over SFTP) Monday and Thursday at 02:00. Logs: `docker logs restic`.
 - `backup.sh` is bind-mounted and bash reads it while running. Check `docker exec restic pgrep -fl 'backup.sh|restic'` before editing it. While a run is in progress, write the new version to a temporary file and `mv` it over `backup.sh` (new inode), never edit in place, and delete the temporary file.
+- BookStack MariaDB is dumped by `dump-mariadb.sh` into `$DUMP_DIR/$BOOKSTACK_DB_CONTAINER.sql` before restic runs. Keep the InnoDB check, single-transaction dump and atomic replacement; a failed or empty dump must abort the backup. Live BookStack database files and private restore-test directories are excluded; restore into a fresh database using the backed-up application credentials and configuration.
+- `container-restarts.sh` runs every minute via restic's cron and atomically publishes Docker `RestartCount` plus a collection timestamp to node-exporter. Keep it independent of the backup lock; stale collection must fail monitoring. Do not use cAdvisor `container_start_time_seconds` to detect restarts: it stayed unchanged during controlled restarts.
 - A run takes ~2 h; overlapping runs exit with "Another backup is already running", which also skips a scheduled push.
 - Keep `--ignore-inode`: the CIFS shares have unstable inode numbers, without it every file looks changed and runs take 4-7 h. Keep `--group-by host,tags` on `restic backup` too: by default the parent snapshot is matched by paths, so changing `BACKUP_PATHS` would re-read the whole ~1 TB.
 - New path in `BACKUP_PATHS`: also mount it in `docker-compose.yml` and recreate the container at the same time, between two runs. A path missing in the container makes `restic backup` fail and the script stop.
@@ -80,8 +83,14 @@ The ISP box is the LAN DHCP and DNS server (the server uses it too). Pi-hole is 
 
 - `static/` and `app.py` are baked into the image: rebuild with `docker compose up -d --build homepage`. `config.yml` is mounted: `docker restart homepage` is enough.
 
+## Uptime Kuma (`uptime-kuma/`)
+
+- Five `[Reliability]` monitors are managed by `reliability.js` through the native Socket.IO API, without restarting Kuma. Preserve unrelated monitors and notification bindings; take a private online SQLite backup before edits. Backup-age limits come from the homepage; missing/stale sources must fail checks. Ask before using `--test-notification` to send a Discord test (details: `uptime-kuma/README.md`).
+- The shared Discord notification uses the native custom template with 🚨 outage, ✅ recovery and 🧪 test emojis. Reapply with `reliability.js --discord-emojis`; this updates only notification formatting, preserves bindings and sends no test by default. Do not patch the vendor notification provider.
+
 ## BookStack (`book-stack/`)
 
+- Recovery testing: use a private restored working copy on an internal-only Docker network, without production mounts, published ports or Traefik; use local authentication in the test instance and never reset production credentials. SQL-based recovery was verified before excluding live MariaDB files; distinguish local-login testing from OIDC testing (details: `book-stack/README.md`).
 - Keep OSCP maintenance scripts, browser tests and their guide in `/data/many-notes/bookstack/tools/oscp/`, outside this Git repository. The installed pages and variable helper are stored in BookStack, not loaded from those source files.
 - The OSCP site requires Authentik login. For authorized local maintenance, the app is in `/app/www` inside `oscp-bookstack`, with persistent config at `/config`. Bootstrap PHP with `vendor/autoload.php`, `bootstrap/app.php`, then the console kernel; inspect the current models and methods before using them.
 - Use native `PageRepo::update` under the appropriate existing user, not direct SQL updates, to retain revisions, search indexing and reference updates. Use it for renames too, since titles can change page slugs and links.
@@ -100,4 +109,4 @@ The ISP box is the LAN DHCP and DNS server (the server uses it too). Pi-hole is 
 
 - Setup and services: [rpi/README.md](rpi/README.md). SSH as `thome` (passwordless sudo) with `restic/secrets/rpi-ssh-key`: passphrase-protected, load it into a temporary `ssh-agent` with `SSH_ASKPASS` reading `restic/secrets/rpi-ssh-passphrase`, `UserKnownHostsFile=restic/secrets/rpi-known-hosts`; host from `RPI_REPOSITORY` in `restic/.env`. Kill the agent afterwards.
 - The Pi has its own checkout of this repo with local uncommitted edits: change files there with targeted edits, never overwrite them. It uses `sudo docker compose`.
-- The WD My Cloud is a CIFS share mounted on the Pi at `/mnt/wdmycloud` (`/etc/fstab` there); its password is kept in `restic/secrets/wdmycloud-password` (not used by restic itself). Known issue, still to fix: the mount is unreliable, especially after a reboot, which breaks the `--push` copy and the homepage Storage card.
+- The WD My Cloud is a CIFS share mounted on the Pi at `/mnt/wdmycloud` (`/etc/fstab` there). The current mount uses guest access and SMB 2.1; the stored `restic/secrets/wdmycloud-password` is not used by this mount or restic. `x-systemd.automount` plus `/etc/cron.d/wdmycloud-mount` triggers access after a 60-second boot delay and every 5 minutes. A controlled reboot verified recovery and off-site repository access on 2026-11-27; the historical failure was not reproduced. If it recurs, capture mount/automount and kernel CIFS journals before changing configuration. Confirm a real CIFS mount before any write test to avoid writing to the Pi's SD card.

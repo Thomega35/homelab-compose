@@ -65,6 +65,22 @@ sudo docker-compose up -d
 - Used by the homepage Storage card: Pi SD card (`/`) and WD My Cloud (`/mnt/wdmycloud`)
 - `/mnt/wdmycloud` is an `x-systemd.automount` CIFS share (`/etc/fstab`): it is only mounted on first access, so `/etc/cron.d/wdmycloud-mount` lists it at boot and every 5 minutes (otherwise it shows as unavailable after a reboot)
 
+### WD My Cloud boot recovery
+
+The boot cron waits 60 seconds before accessing the share; the mount can therefore be absent during the first minute after boot. The current mount uses guest access and SMB 2.1. The recurring cron retries access every 5 minutes.
+
+A controlled reboot on 2026-11-27 verified automatic mounting by the boot cron, successful create/read/delete access as the backup user, and access to the off-site restic snapshots over SFTP. No mount configuration change was needed; the historical failure was not reproduced.
+
+If it fails again, collect diagnostics before manually mounting it:
+
+```sh
+systemctl --no-pager status mnt-wdmycloud.mount mnt-wdmycloud.automount
+sudo -A journalctl -b -u mnt-wdmycloud.mount -u mnt-wdmycloud.automount --no-pager
+sudo -A journalctl -b -k --no-pager | grep -Ei 'CIFS|SMB'
+```
+
+Redact addresses before sharing logs. Before a write test, verify `/mnt/wdmycloud` is actually a CIFS mount, not just the underlying directory on the Pi's SD card.
+
 Start or update:
 
 ```bash
