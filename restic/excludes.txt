@@ -4,6 +4,12 @@
 /data/authentik/postgres
 /data/dawarich/db_data
 
+# BookStack MariaDB: consistent SQL dump in DUMP_DIR, restore-tested before exclusion
+/data/many-notes/bookstack/database
+
+# Private recovery-test copies are not production backup sources
+/data/backups/restore-tests
+
 # Immich: thumbs and encoded videos are regenerated from the originals, DB dumps are covered by DUMP_DIR
 /mnt/nas-images/thumbs
 /mnt/nas-images/encoded-video

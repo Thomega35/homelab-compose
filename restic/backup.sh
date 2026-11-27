@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Dumps every running Postgres container to $DUMP_DIR,
+# Dumps every running Postgres container and the BookStack MariaDB database to $DUMP_DIR,
 # then backs up $BACKUP_PATHS with restic (databases first, files after, as recommended by Immich).
 # Also writes the Immich and repository sizes to $METRICS_DIR (node-exporter textfile collector, shown on the homepage)
 # and the snapshot lists to $SNAPSHOTS_DIR (shown on the homepage).
@@ -16,6 +16,7 @@ DUMP_DIR="${DUMP_DIR:-/data/backups/postgres}"
 METRICS_DIR="${METRICS_DIR:-/data/grafana/textfile}"
 SNAPSHOTS_DIR="${SNAPSHOTS_DIR:-/data/backups/snapshots}"
 IMMICH_DB_CONTAINER="${IMMICH_DB_CONTAINER:-immich_postgres}"
+BOOKSTACK_DB_CONTAINER="${BOOKSTACK_DB_CONTAINER:-oscp-bookstack-db}"
 ha=0 push=0
 for arg in "$@"; do
   case "$arg" in
@@ -93,6 +94,13 @@ for c in $(docker ps --format '{{.Names}} {{.Image}}' | awk '$2 ~ /postgres|post
     failed=1
   fi
 done
+
+# Raw MariaDB files are excluded, so a failed dump must prevent a new snapshot.
+log "Dumping $BOOKSTACK_DB_CONTAINER"
+if ! bash "$SCRIPT_DIR/dump-mariadb.sh" "$BOOKSTACK_DB_CONTAINER" "$DUMP_DIR/$BOOKSTACK_DB_CONTAINER.sql"; then
+  log "ERROR: MariaDB dump failed; backup aborted"
+  exit 1
+fi
 
 # Size of the Immich originals from its database (scanning the NAS share takes far too long); thumbnails and encoded videos not included
 if immich=$(docker exec "$IMMICH_DB_CONTAINER" sh -c 'psql -U "$POSTGRES_USER" -d "${POSTGRES_DB:-immich}" -Atc "SELECT COALESCE(sum(\"fileSizeInByte\"), 0) FROM asset_exif"' 2>&1) \

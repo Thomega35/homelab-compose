@@ -17,7 +17,7 @@ Simple Docker Compose files for my homelab services.
 - `lan-orangutan/`: LAN Orangutan network device scanner (host network)
 - `meshcentral/`: MeshCentral remote device management
 - `minecraft/`: Minecraft server with the BlueMap web map
-- `book-stack/`: BookStack OSCP documentation with native Authentik OIDC and MariaDB
+- `book-stack/`: BookStack OSCP documentation with native Authentik OIDC and MariaDB ([backup and recovery tests](book-stack/README.md))
 - `nextcloud/`: Nextcloud with Postgres and Redis, data on the NAS
 - `obsidian/`: Obsidian desktop app in the browser (Selkies), vaults in `/data/obsidian/config`, behind Traefik + Authentik
 - `openspeedtest/`: OpenSpeedTest self-hosted speed test server
@@ -25,7 +25,7 @@ Simple Docker Compose files for my homelab services.
 - `pihole/`: Pi-hole DNS (macvlan), not the LAN default: the ISP box does DHCP and DNS, currently under maintenance
 - `portainer/`: Portainer CE container management UI
 - `qdirstat/`: QDirStat disk usage analyzer (host `/` mounted read-only) behind Traefik + Authentik
-- `restic/`: Backups to the NAS every 2 h (Postgres dumps, `/data`, NAS shares) and copy to the Pi's WD My Cloud twice a week
+- `restic/`: Backups to the NAS every 2 h (Postgres and BookStack MariaDB dumps, `/data`, NAS shares) and copy to the Pi's WD My Cloud twice a week
 - `rpi/`: Raspberry Pi stacks (see [rpi/README.md](rpi/README.md))
 - `rustdesk/`: RustDesk self-hosted server (hbbs + hbbr)
 - `screeps/`: Screeps relay UI behind Traefik + Authentik
@@ -150,7 +150,7 @@ graph LR
     Homepage --> HPProxy[Homepage docker-proxy]
     HPProxy -.-> Docker
 
-    Restic -->|pg_dumpall of Postgres containers + volume backup| Docker
+    Restic -->|Postgres and BookStack MariaDB dumps + volume backup| Docker
     Restic -->|Immich / repo sizes, textfile| NodeExp
     UptimeKuma -.->|monitors| ForwardAuth
     UptimeKuma -.->|monitors| OIDC
