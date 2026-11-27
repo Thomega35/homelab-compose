@@ -21,7 +21,7 @@ Docker Compose stacks for a single homelab server (`thome-server`) plus a Raspbe
 
 ## Environment
 
-- The agent runs in the `vscode` container (code-server, as root) with the host Docker socket and CLI; `/data` and `/home/thome` are mounted at the same paths. No `python3`, `jq` or `node`: use `docker exec <container> ...` or a throwaway container.
+- Sessions can run in the `vscode` container (code-server, as root) or directly on the host through SSH. Confirm the current session context before assuming container limitations or restart impact. In the container, the host Docker socket and CLI are available; `/data` and `/home/thome` are mounted at the same paths. No `python3`, `jq` or `node` there: use `docker exec <container> ...` or a throwaway container.
 - Host shell: `docker run --rm --privileged --pid=host alpine nsenter -t 1 -m -u -i -n -p -- sh -c '...'`; read-only inspection: `docker run --rm -v /:/host:ro alpine ...`.
 - NAS CIFS shares `/mnt/nas` and `/mnt/nas-images` are host fstab mounts. NetworkManager can report online too early at boot, so a docker.service drop-in (`/etc/systemd/system/docker.service.d/wait-nas.conf` → `/usr/local/sbin/wait-nas-mounts.sh`) retries them for 60 s before Docker starts (details: README "Host: NAS mounts before Docker"). If they are missing anyway (restic exits 127 "open /mnt/nas/backups", Immich restarts on `.immich` folder checks): `systemctl start mnt-nas.mount 'mnt-nas\x2dimages.mount'` on the host, then restart restic, Immich and Nextcloud.
 - `/home/thome/makabe` and `/home/thome/LabOrchestra` are separate Compose projects outside this repo (`fanfare-makabes.fr`, their own Watchtower), served by the same Traefik. Both are backed up by restic (`makabe` also through the `makabe-db` dump). Leave them alone.
@@ -30,7 +30,7 @@ Docker Compose stacks for a single homelab server (`thome-server`) plus a Raspbe
 
 Ask first before: restarting or recreating a stack other than the one being edited, `docker compose down`, deleting volumes or `/data` content, `restic unlock`/`forget`/`prune` by hand, changes on the host outside Docker, anything on the Pi, `git push`.
 
-Restarting `traefik` or `authentik` cuts access to every web app, and `vscode` kills this editor session.
+Restarting `traefik` or `authentik` interrupts shared web access. Restarting `vscode` disconnects code-server editor/agent sessions, but not an independent host SSH session; do not automatically exclude its update when operating through SSH.
 
 The ISP box is the LAN DHCP and DNS server (the server uses it too). Pi-hole is not used by default: it was dropped after repeated outages, probably caused by its macvlan network.
 
@@ -39,6 +39,31 @@ The ISP box is the LAN DHCP and DNS server (the server uses it too). Pi-hole is 
 - Read the release notes between the current and target versions for breaking changes or removed services before bumping a tag.
 - Back up first to `/data/backups/pre-upgrade-YYYYMMDD`; stop SQLite-based apps before copying their data (WAL files). restic already dumps Postgres containers to `/data/backups/postgres`.
 - WUD API needs basic auth: query it from inside with `docker exec wud node -e` and `fetch('http://localhost:3000/api/containers')`, credentials from the container's `WUD_AUTH_ADMIN_USER`/`WUD_AUTH_ADMIN_PASSWORD` env. Force a re-check with `POST /api/containers/<id>/watch`.
+
+## Authentik (`authentik/`)
+
+- Treat updates/recreation as a shared-access outage risk: if Authentik cannot start, Traefik loses the `authentik-auth@docker` middleware defined on its server container and protected apps can return 404 despite healthy app containers.
+- Recreation can expose a mismatch between the configured database password and PostgreSQL's stored role password. `POSTGRES_PASSWORD` only initializes a new database; changing it or recreating Postgres does not update an existing role. An image update alone is not evidence that it changed the password.
+- Before and after an upgrade, test password authentication over the database container's network interface, not localhost or a Unix socket (both use `trust` here and can falsely suggest the password works):
+
+  ```sh
+  docker exec authentik_postgres sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$(hostname -i)" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atqc "SELECT 1" >/dev/null'
+  ```
+
+- If Authentik logs `password authentication failed for user "authentik"`, verify that the server/worker's `AUTHENTIK_POSTGRESQL__PASSWORD` matches the database container's `POSTGRES_PASSWORD` without displaying either value, and confirm they target the intended database. If they match but the TCP test fails, ask permission before synchronizing the stored role password. Do not delete/reinitialize the database or weaken authentication.
+- Back up the roles privately first; the dump contains password verifiers and must not be printed or committed. This path persists under `/data/authentik/postgres/backups` on the host:
+
+  ```sh
+  docker exec authentik_postgres sh -c 'umask 077; mkdir -p /var/lib/postgresql/backups; pg_dumpall -U "$POSTGRES_USER" --globals-only > "/var/lib/postgresql/backups/roles-before-password-repair-$(date -u +%Y%m%dT%H%M%SZ).sql"'
+  ```
+
+- After authorization and a successful backup, synchronize the existing `authentik` role with the configured password using `psql`'s client-side password encryption, without putting the secret in SQL text, command arguments or terminal output:
+
+  ```sh
+  docker exec authentik_postgres sh -c 'printf "%s\n%s\n" "$POSTGRES_PASSWORD" "$POSTGRES_PASSWORD" | psql -X -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\password authentik"'
+  ```
+
+- Repeat the TCP test, wait for both `authentik_server` and `authentik_worker` to become healthy, and check login redirects with `curl` for `https://auth.thomega.fr/`, `https://wud.thomega.fr/` and Homepage at `https://thomega.fr/` (not `homepage.thomega.fr`). Following redirects should reach HTTP 200 login pages. The crash-looping containers can recover automatically; do not restart Traefik or unrelated stacks.
 
 ## restic (`restic/`)
 

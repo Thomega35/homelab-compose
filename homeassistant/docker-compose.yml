@@ -16,6 +16,8 @@ services:
       - NET_ADMIN
       - NET_RAW
     labels:
+      - 'wud.tag.include=^\d{4}\.\d+$$'
+      - 'wud.watch.digest=true'
       - 'traefik.enable=true'
       - 'traefik.http.routers.homeassistant.rule=Host(`home.thomega.fr`)'
       - 'traefik.http.routers.homeassistant.entryPoints=websecure'

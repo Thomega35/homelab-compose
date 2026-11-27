@@ -32,6 +32,9 @@ services:
   homepage-docker-proxy:
     image: wollomatic/socket-proxy:1
     container_name: homepage-docker-proxy
+    labels:
+      - 'wud.tag.include=^\d+$$'
+      - 'wud.watch.digest=true'
     # nobody:<docker group of the host socket>
     user: "65534:124"
     read_only: true

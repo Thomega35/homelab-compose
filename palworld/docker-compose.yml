@@ -72,6 +72,9 @@ services:
   palworld-docker-proxy:
     image: wollomatic/socket-proxy:1
     container_name: palworld-docker-proxy
+    labels:
+      - 'wud.tag.include=^\d+$$'
+      - 'wud.watch.digest=true'
     # nobody:<docker group of the host socket>
     user: "65534:124"
     read_only: true

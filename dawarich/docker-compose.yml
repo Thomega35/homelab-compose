@@ -2,6 +2,9 @@ services:
   dawarich_redis:
     image: redis:8.12-trixie
     container_name: dawarich_redis
+    labels:
+      - 'wud.tag.include=^\d+\.\d+-trixie$$'
+      - 'wud.watch.digest=true'
     command: >
       redis-server
       --save 900 1

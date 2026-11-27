@@ -36,7 +36,9 @@ services:
     image: postgres:18-alpine
     restart: unless-stopped
     labels:
-      - 'wud.tag.include=^\d+-alpine$$'
+      # Postgres majors need a dump/restore
+      - 'wud.tag.include=^18-alpine$$'
+      - 'wud.watch.digest=true'
     environment:
       - POSTGRES_DB=nextcloud
       - POSTGRES_USER=nextcloud
@@ -57,6 +59,7 @@ services:
     restart: unless-stopped
     labels:
       - 'wud.tag.include=^\d+-alpine$$'
+      - 'wud.watch.digest=true'
     command: ["redis-server", "--save", "", "--appendonly", "no"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]

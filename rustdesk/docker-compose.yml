@@ -1,7 +1,9 @@
 services:
   hbbr:
-    image: rustdesk/rustdesk-server:1.1.15
+    image: rustdesk/rustdesk-server:1.1.16
     container_name: rustdesk-hbbr
+    labels:
+      - 'wud.watch.digest=true'
     command: hbbr
     volumes:
       - /data/rustdesk:/root
@@ -9,8 +11,10 @@ services:
     restart: unless-stopped
 
   hbbs:
-    image: rustdesk/rustdesk-server:1.1.15
+    image: rustdesk/rustdesk-server:1.1.16
     container_name: rustdesk-hbbs
+    labels:
+      - 'wud.watch.digest=true'
     command: hbbs
     volumes:
       - /data/rustdesk:/root

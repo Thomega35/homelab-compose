@@ -1,6 +1,6 @@
 services:
   lan-orangutan:
-    image: ghcr.io/291-group/lan-orangutan:3.4.2
+    image: ghcr.io/291-group/lan-orangutan:4.0.0
     container_name: lan-orangutan
     restart: unless-stopped
     # Host networking is required to scan the real LAN instead of Docker's bridge
